@@ -14,7 +14,6 @@ const firebaseConfig = {
   measurementId: "G-HYZJ8YM99H"
 };
 
-// Reuse the same named app from both config and page modules.
 const app = initializeApp(firebaseConfig, "stratos-global-edu");
 const db = getFirestore(app);
 
