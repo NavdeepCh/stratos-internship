@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Orders Dashboard | Stratos</title>
+  <style>
+    :root { color-scheme: light; --ink:#17211b; --muted:#66736a; --line:#dce4dc; --paper:#f4f7f3; --green:#c9f36a; --dark:#202723; --red:#b42318; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
+    header { background:var(--dark); color:white; padding:22px clamp(16px,4vw,48px); display:flex; gap:16px; align-items:center; justify-content:space-between; }
+    h1 { margin:0; font-size:clamp(20px,3vw,28px); }
+    main { max-width:1600px; margin:auto; padding:clamp(16px,3vw,36px); }
+    .panel { background:white; border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:0 6px 24px #17211b0a; }
+    .login { max-width:440px; margin:7vh auto; }
+    label { display:block; font-weight:650; margin:14px 0 6px; }
+    input { font:inherit; width:100%; min-width:220px; padding:11px 12px; border:1px solid #cbd5cb; border-radius:8px; }
+    input:focus { outline:3px solid #c9f36a88; border-color:#60753c; }
+    button { font:inherit; font-weight:700; cursor:pointer; padding:10px 15px; border:0; border-radius:8px; background:var(--green); color:#17211b; }
+    button.secondary { background:#e9eee8; }
+    button:disabled { opacity:.55; cursor:wait; }
+    .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:18px 0; }
+    .toolbar input { flex:1; }
+    #status { color:var(--muted); min-height:24px; margin:12px 0; }
+    #status.error { color:var(--red); }
+    .table-wrap { overflow:auto; background:white; border:1px solid var(--line); border-radius:12px; }
+    table { border-collapse:collapse; width:100%; min-width:1700px; font-size:13px; }
+    th,td { text-align:left; vertical-align:top; padding:11px 12px; border-bottom:1px solid var(--line); }
+    th { position:sticky; top:0; z-index:1; background:#edf2eb; white-space:nowrap; }
+    td { max-width:280px; overflow-wrap:anywhere; }
+    tbody tr:hover { background:#f8faf7; }
+    .pill { display:inline-block; border-radius:999px; padding:3px 9px; background:#eef2ec; white-space:nowrap; }
+    .hint { color:var(--muted); font-size:13px; }
+    [hidden] { display:none !important; }
+    @media (max-width:600px) { header { align-items:flex-start; } .panel { padding:16px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Stratos · Orders Dashboard</h1>
+    <button id="signOutButton" class="secondary" type="button" hidden>Sign out</button>
+  </header>
+  <main>
+    <section id="loginPanel" class="panel login">
+      <h2>Admin sign-in</h2>
+      <p class="hint">Sign in with an account authorized by your Firestore Security Rules.</p>
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <p id="loginStatus" role="status" class="hint"></p>
+        <button id="loginButton" type="submit">Sign in</button>
+      </form>
+    </section>
+
+    <section id="dashboardPanel" hidden>
+      <div class="panel">
+        <h2>Order records</h2>
+        <p class="hint">Showing the latest 500 records from the top-level Firestore <code>orders</code> collection. Sensitive student information is visible here; keep access restricted with Firestore Rules.</p>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Search name, email, phone, track, status…" aria-label="Search orders">
+          <button id="refreshButton" type="button">Refresh</button>
+        </div>
+        <p id="status" role="status" aria-live="polite">Loading orders…</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Document ID</th><th>Full name</th><th>Phone</th><th>Email</th><th>Track</th><th>Sub-domain</th>
+              <th>Start date</th><th>End date</th><th>Certificate type</th><th>Payment status</th><th>Payment ID</th>
+              <th>Certificate dispatched</th><th>User ID</th><th>Created at</th>
+            </tr></thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { collection, getDocs, limit, orderBy, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { app, db } from "./firebase-config.js";
+
+    const auth = getAuth(app);
+    const loginPanel = document.getElementById("loginPanel");
+    const dashboardPanel = document.getElementById("dashboardPanel");
+    const loginStatus = document.getElementById("loginStatus");
+    const status = document.getElementById("status");
+    const ordersBody = document.getElementById("ordersBody");
+    const search = document.getElementById("search");
+    const loginButton = document.getElementById("loginButton");
+    const signOutButton = document.getElementById("signOutButton");
+    let records = [];
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle("error", isError);
+    }
+
+    function displayValue(value) {
+      if (value === undefined || value === null || value === "") return "—";
+      if (typeof value === "boolean") return value ? "Yes" : "No";
+      if (value && typeof value.toDate === "function") return value.toDate().toLocaleString();
+      if (typeof value === "object") return JSON.stringify(value);
+      return String(value);
+    }
+
+    function renderRows() {
+      const term = search.value.trim().toLowerCase();
+      const filtered = records.filter((record) => Object.values(record).some((value) => displayValue(value).toLowerCase().includes(term)));
+      ordersBody.replaceChildren();
+      for (const record of filtered) {
+        const row = document.createElement("tr");
+        const values = [
+          record.id, record.fullName, record.phone, record.email, record.track, record.subDomain,
+          record.startDate, record.endDate, record.certificateType ?? record.tier,
+          record.paymentStatus, record.paymentId, record.certificateDispatched, record.userId, record.createdAt
+        ];
+        for (const value of values) {
+          const cell = document.createElement("td");
+          const text = displayValue(value);
+          if (value === record.paymentStatus || typeof value === "boolean") {
+            const badge = document.createElement("span");
+            badge.className = "pill";
+            badge.textContent = text;
+            cell.append(badge);
+          } else {
+            cell.textContent = text;
+          }
+          row.append(cell);
+        }
+        ordersBody.append(row);
+      }
+      setStatus(`Showing ${filtered.length} of ${records.length} loaded order(s).`);
+    }
+
+    async function loadOrders() {
+      setStatus("Loading orders…");
+      ordersBody.replaceChildren();
+      try {
+        const ordersQuery = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(500));
+        const snapshot = await getDocs(ordersQuery);
+        records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        renderRows();
+      } catch (error) {
+        console.error("Orders query failed:", error);
+        if (error.code === "permission-denied") {
+          setStatus("Access denied by Firestore Security Rules. Allow reads only for your authorized admin account.", true);
+        } else if (error.code === "failed-precondition") {
+          setStatus("Firestore requires an index for this query. Follow the index link in the browser console, or add createdAt descending index for orders.", true);
+        } else {
+          setStatus(`Could not load orders: ${error.message}`, true);
+        }
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginButton.disabled = true;
+      loginStatus.textContent = "Signing in…";
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById("email").value.trim(), document.getElementById("password").value);
+        loginStatus.textContent = "";
+      } catch (error) {
+        console.error("Admin sign-in failed:", error);
+        loginStatus.textContent = error.code === "auth/unauthorized-domain"
+          ? "This site domain is not authorized in Firebase Authentication settings."
+          : "Sign-in failed. Check the credentials and ensure Email/Password sign-in is enabled.";
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    signOutButton.addEventListener("click", () => signOut(auth));
+    document.getElementById("refreshButton").addEventListener("click", loadOrders);
+    search.addEventListener("input", renderRows);
+
+    onAuthStateChanged(auth, (user) => {
+      loginPanel.hidden = Boolean(user);
+      dashboardPanel.hidden = !user;
+      signOutButton.hidden = !user;
+      if (user) loadOrders();
+      else {
+        records = [];
+        ordersBody.replaceChildren();
+        loginStatus.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
