@@ -14,11 +14,11 @@ const firebaseConfig = {
   measurementId: "G-HYZJ8YM99H"
 };
 
-// Keep this named app isolated from the legacy placeholder initialization in index.html.
+// Reuse the same named app from both config and page modules.
 const app = initializeApp(firebaseConfig, "stratos-global-edu");
 const db = getFirestore(app);
 
 // Analytics is only available in supported browser environments (for example, not file://).
-const analytics = (await isSupported()) ? getAnalytics(app) : null;
+const analytics = isSupported().then((supported) => supported ? getAnalytics(app) : null);
 
 export { app, analytics, db, firebaseConfig };
