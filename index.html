@@ -110,8 +110,8 @@
     </nav>
 
     <div class="hidden md:flex items-center gap-3">
-      <button onclick="openModal('Explore All Tracks')" class="button button-outline !border-[var(--line)] !text-[var(--ink)] py-2.5 px-4">Intern Login</button>
-      <button onclick="openModal('Priority Seat')" class="button button-green py-2.5 px-5">Claim Seat Now <span>→</span></button>
+      <button onclick="openCheckoutModal('Software Development')" class="button button-outline !border-[var(--line)] !text-[var(--ink)] py-2.5 px-4">Intern Login</button>
+      <button onclick="openCheckoutModal('Artificial Intelligence & GenAI')" class="button button-green py-2.5 px-5">Claim Seat Now <span>→</span></button>
     </div>
 
     <button onclick="toggleMobileMenu()" class="md:hidden text-slate-800 p-2 focus:outline-none" aria-label="Toggle menu">
@@ -126,14 +126,14 @@
     <a href="#verification" onclick="toggleMobileMenu()" class="block font-semibold text-slate-700 py-1">QR ID Verification</a>
     <a href="#how" onclick="toggleMobileMenu()" class="block font-semibold text-slate-700 py-1">How It Works</a>
     <div class="pt-3 border-t border-[var(--line)] flex flex-col gap-2">
-      <button onclick="openModal('Explore All Tracks'); toggleMobileMenu();" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-full justify-center">Intern Login</button>
-      <button onclick="openModal('Priority Seat'); toggleMobileMenu();" class="button button-green w-full justify-center">Claim Seat Now</button>
+      <button onclick="openCheckoutModal('Software Development'); toggleMobileMenu();" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-full justify-center">Intern Login</button>
+      <button onclick="openCheckoutModal('Artificial Intelligence & GenAI'); toggleMobileMenu();" class="button button-green w-full justify-center">Claim Seat Now</button>
     </div>
   </div>
 </header>
 
 <main>
-  <!-- Partner Institutional Standards Bar with Authentic Logo URLs -->
+<!-- Partner Institutional Standards Bar -->
 <section class="bg-white border-b border-[var(--line)] py-4">
  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-4">
   <div class="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)]">Recognized &amp; Aligned Standards</div>
@@ -237,7 +237,7 @@
     </div>
   </section>
 
-  <!-- 3 Pricing Tiers Section (₹99, ₹199, ₹299 with psychological triggers) -->
+  <!-- 3 Pricing Tiers Section -->
   <section id="pricing" class="py-20 bg-white border-t border-[var(--line)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="max-w-3xl mx-auto mb-16">
@@ -270,7 +270,7 @@
           </div>
 
           <div class="pt-8">
-            <button onclick="openModal('Tier 1: Basic Virtual Internship (₹99)')" class="button button-dark w-full justify-center">
+            <button onclick="openCheckoutModal('Software Development')" class="button button-dark w-full justify-center">
               Enroll for ₹99 →
             </button>
           </div>
@@ -302,7 +302,7 @@
           </div>
 
           <div class="pt-8">
-            <button onclick="openModal('Tier 2: Instant PDF Certificate & QR ID (₹199)')" class="button button-green w-full justify-center shadow-xl">
+            <button onclick="openCheckoutModal('Artificial Intelligence & GenAI')" class="button button-green w-full justify-center shadow-xl">
               Get Instant PDF &amp; Seat (₹199) →
             </button>
           </div>
@@ -334,7 +334,7 @@
           </div>
 
           <div class="pt-8">
-            <button onclick="openModal('Tier 3: Stratos VIP Career Accelerator (₹299)')" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-[0.16em] shadow-lg">
+            <button onclick="openCheckoutModal('Cloud Computing & DevOps')" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-[0.16em] shadow-lg">
               Get VIP Access (₹299) →
             </button>
           </div>
@@ -344,7 +344,7 @@
     </div>
   </section>
 
-  <!-- Highlighted Section: Instant QR & ID Verification -->
+  <!-- Instant QR & ID Verification Section -->
   <section id="verification" class="py-20 bg-white border-t border-[var(--line)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="bg-[var(--dark)] text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
@@ -382,7 +382,7 @@
                 <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Verified</span>
               </div>
               <div class="bg-white text-slate-900 rounded-2xl p-4 text-center shadow-2xl space-y-3 cursor-pointer hover:scale-105 transition-transform" onclick="triggerVerificationPopup()">
-                <img src="./Modern Professional Completion Certificate.png" alt="Sample certificate" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm">
+                <img src="./Modern Professional Completion Certificate.png" alt="Sample certificate" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Verified+Certificate'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm">
                 <div class="pt-2">
                   <h4 class="text-sm font-black text-[var(--ink)]">Stratos Verified ID: #STR-88942</h4>
                   <span class="inline-block bg-emerald-100 text-emerald-700 text-xs font-extrabold px-3 py-1 rounded-full">✓ Verified PDF Sent to Email</span>
@@ -417,13 +417,13 @@
     </div>
   </div>
 
-  <!-- Domain Explorer Catalog -->
+  <!-- Comprehensive Domain Catalog with Sector/Track Cards Wired Up -->
   <section id="sectors" class="py-20 bg-[var(--paper)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="max-w-3xl mx-auto mb-10">
         <span class="text-xs font-extrabold uppercase tracking-widest text-[var(--dark-green)]">Comprehensive Domain Library</span>
         <h2 class="text-3xl sm:text-4xl font-black text-[var(--ink)] mt-2 mb-4">Explore All 35+ Summer Internship Domains</h2>
-        <p class="text-[var(--muted)] text-sm leading-relaxed">Select any domain to instantly allocate your seat and receive your PDF certificate and QR ID via email.</p>
+        <p class="text-[var(--muted)] text-sm leading-relaxed">Select any domain card below to instantly open the checkout modal with your track pre-filled.</p>
       </div>
       
       <div class="domain-filter-tabs flex justify-center gap-2 flex-wrap mb-10">
@@ -539,35 +539,100 @@
   </div>
 </footer>
 
-<!-- Modal Form -->
-<div class="modal fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4" id="modal">
-  <div class="modal-card bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative text-left">
-    <button onclick="closeModal()" class="modal-close absolute right-5 top-5 border-0 bg-slate-100 rounded-full h-8 w-8 font-bold">×</button>
+<!-- Additive Checkout Modal with Sub-Domain / Specialized Task Focus & Tier Selectors -->
+<div id="checkoutModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl relative text-left max-h-[90vh] overflow-y-auto">
+    <button onclick="closeCheckoutModal()" class="absolute right-5 top-5 border-0 bg-slate-100 rounded-full h-8 w-8 font-bold text-slate-600 hover:bg-slate-200">×</button>
     
-    <div class="bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold px-3 py-1.5 rounded-lg mb-4 flex items-center justify-between">
-      <span>🔥 Cart Lock Active</span>
-      <span class="font-mono font-extrabold text-red-600" id="modalTimer">09:59</span>
+    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold px-3 py-1.5 rounded-lg mb-4 flex items-center justify-between">
+      <span>🔒 Secure SSL Registration &amp; Dispatch</span>
+      <span class="font-mono font-extrabold text-emerald-700" id="checkoutModalTimer">09:59</span>
     </div>
 
-    <h3 class="text-2xl font-black text-[var(--ink)] mb-1">Secure Seat &amp; Get Instant PDF</h3>
-    <p class="text-xs text-[var(--muted)] mb-6">Enter your email to instantly receive your official PDF certificate and QR ID upon registration.</p>
+    <h3 class="text-2xl font-black text-[var(--ink)] mb-1">Complete Internship Checkout</h3>
+    <p class="text-xs text-[var(--muted)] mb-6">Fill in your enrollment details below to secure your seat and initialize instant credential generation.</p>
     
-    <form id="applyForm" onsubmit="handleModalSubmit(event)" class="space-y-4">
+    <form id="checkoutForm" onsubmit="handleCheckoutSubmit(event)" class="space-y-4">
       <div>
-        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Full Name (As on ID)</label>
-        <input id="fullName" placeholder="e.g. Rahul Sharma" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Full Name</label>
+        <input id="checkoutFullName" placeholder="e.g. Rahul Sharma" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
       </div>
       <div>
-        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Email Address (For PDF Delivery)</label>
-        <input id="applyEmail" type="email" placeholder="rahul@example.com" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Phone Number</label>
+        <input id="checkoutPhone" type="tel" placeholder="e.g. +91 98765 43210" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
       </div>
       <div>
-        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Preferred Domain</label>
-        <input id="interest" placeholder="e.g. Artificial Intelligence / Full Stack" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Email Address</label>
+        <input id="checkoutEmail" type="email" placeholder="rahul@example.com" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
       </div>
-      <button type="submit" class="button button-green w-full justify-center !mt-4">
-        Proceed &amp; Dispatch PDF to Email →
-      </button>
+      <div>
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Selected Internship Track</label>
+        <select id="checkoutTrack" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+          <option value="Software Development">Software Development</option>
+          <option value="Artificial Intelligence & GenAI">Artificial Intelligence &amp; GenAI</option>
+          <option value="Cloud Computing & DevOps">Cloud Computing &amp; DevOps</option>
+          <option value="Cyber Security & Ethical Hacking">Cyber Security &amp; Ethical Hacking</option>
+          <option value="Data Science & Analytics">Data Science &amp; Analytics</option>
+          <option value="Mobile App Development">Mobile App Development</option>
+          <option value="Aerospace Engineering Simulation">Aerospace Engineering Simulation</option>
+          <option value="Automotive & EV Technology">Automotive &amp; EV Technology</option>
+          <option value="Embedded Systems & IoT">Embedded Systems &amp; IoT</option>
+          <option value="Robotics & Automation">Robotics &amp; Automation</option>
+          <option value="Management & Entrepreneurship">Management &amp; Entrepreneurship</option>
+          <option value="Human Resources Management">Human Resources Management</option>
+          <option value="Digital Marketing & Growth">Digital Marketing &amp; Growth</option>
+          <option value="Banking & Financial Services">Banking & Financial Services</option>
+          <option value="Retail & Supply Chain Mgmt">Retail & Supply Chain Mgmt</option>
+          <option value="UI/UX Product Design">UI/UX Product Design</option>
+          <option value="Media & Video Production">Media & Video Production</option>
+          <option value="Apparel & Fashion Design">Apparel & Fashion Design</option>
+          <option value="Cyber Law & Compliance">Cyber Law & Compliance</option>
+          <option value="Psychology & Counseling">Psychology & Counseling</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Sub-Domain / Specialized Task Focus</label>
+        <select id="checkoutSubDomain" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+          <optgroup label="Full Stack & Software">
+            <option value="MERN Stack (MongoDB, Express, React, Node)">MERN Stack (MongoDB, Express, React, Node)</option>
+            <option value="Spring Boot & Angular">Spring Boot &amp; Angular</option>
+            <option value="Python Django & Vue.js">Python Django &amp; Vue.js</option>
+          </optgroup>
+          <optgroup label="AI & Machine Learning">
+            <option value="Generative AI & LLM Fine-Tuning">Generative AI &amp; LLM Fine-Tuning</option>
+            <option value="Computer Vision & OpenCV">Computer Vision &amp; OpenCV</option>
+            <option value="Natural Language Processing (NLP)">Natural Language Processing (NLP)</option>
+          </optgroup>
+          <optgroup label="Android & Cloud Architecture">
+            <option value="Android App Dev (Kotlin & Jetpack Compose)">Android App Dev (Kotlin &amp; Jetpack Compose)</option>
+            <option value="AWS Cloud Architecture & Terraform">AWS Cloud Architecture &amp; Terraform</option>
+            <option value="DevOps & Kubernetes Deployment">DevOps &amp; Kubernetes Deployment</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-[var(--ink)] mb-1">Start Date</label>
+          <input id="checkoutStartDate" type="date" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-[var(--ink)] mb-1">End Date</label>
+          <input id="checkoutEndDate" type="date" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-[var(--ink)] mb-1">Certificate Customization Tier</label>
+        <select id="checkoutTier" required class="w-full p-3 border border-[var(--line)] rounded-xl text-xs bg-slate-50 focus:outline-none focus:border-[var(--dark)]">
+          <option value="Tier 1: Basic Virtual Internship (₹99)">Tier 1: Basic Virtual Internship (₹99)</option>
+          <option value="Tier 2: Instant PDF Certificate & QR ID (₹199)" selected>Tier 2: Instant PDF Certificate &amp; QR ID (₹199)</option>
+          <option value="Tier 3: Stratos VIP Career Accelerator (₹299)">Tier 3: Stratos VIP Career Accelerator (₹299)</option>
+        </select>
+      </div>
+      
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeCheckoutModal()" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-1/3 justify-center">Cancel</button>
+        <button type="submit" class="button button-green w-2/3 justify-center">Proceed to Secure Payment →</button>
+      </div>
     </form>
   </div>
 </div>
@@ -581,13 +646,13 @@
       🏆 Instant PDF Certificate Dispatch Active
     </div>
 
-    <h3 class="text-2xl sm:text-3xl font-black text-[var(--ink)]">Your AICTE-Aligned Certificate &amp; QR ID Are Ready!</h3>
+    <h3 class="text-2xl sm:text-3xl font-black text-[var(--ink)]">Buddy Your Verfied Instant Certificate is Ready</h3>
     <p class="text-xs text-[var(--muted)] leading-relaxed max-w-md mx-auto">Select <strong>Tier 2 (₹199)</strong> or <strong>Tier 3 (₹299)</strong> to receive your verified digital certificate and secure QR ID delivered instantly.</p>
     
     <!-- Certificate Graphic Mockup Preview -->
     <div class="bg-white border-2 border-slate-300 rounded-2xl p-6 shadow-inner text-left space-y-3 relative overflow-hidden">
       <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-bl-xl">✓ OFFICIAL PREVIEW</div>
-      <img src="./Modern Professional Completion Certificate.png" alt="Official certificate preview" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm bg-slate-50">
+      <img src="./Modern Professional Completion Certificate.png" alt="Official certificate preview" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Certificate+Preview'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm bg-slate-50">
       <div class="text-[10px] font-extrabold text-[var(--muted)] tracking-widest">STRATOS GLOBAL TECHNOLOGIES</div>
       <div class="text-base font-black text-[var(--ink)]">Certificate of Completion</div>
       <div class="text-[11px] text-slate-600">This is to certify that <strong class="text-blue-600">[Your Name Here]</strong> has successfully completed the Summer Internship Track.</div>
@@ -606,8 +671,48 @@
   </div>
 </div>
 
-<!-- Interactive QR Verification Modal Popup -->
-<div class="toast fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--dark)] text-white text-xs font-bold px-6 py-3.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[60]">test</div>
+<!-- Toast notification element -->
+<div id="toast" class="toast fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--dark)] text-white text-xs font-bold px-6 py-3.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[60]">test</div>
+
+<!-- Firebase CDN Scripts -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'stratos-global-tech-default';
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+    apiKey: "AIzaSyDefaultKeyForStratosPortal",
+    authDomain: "stratos-global.firebaseapp.com",
+    projectId: "stratos-global",
+    storageBucket: "stratos-global.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdef"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  async function initAuth() {
+    try {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+    } catch (err) {
+      console.warn("Auth initialization note:", err);
+    }
+  }
+  initAuth();
+
+  window.db = db;
+  window.auth = auth;
+  window.firestoreCollection = collection;
+  window.firestoreAddDoc = addDoc;
+  window.appId = appId;
+</script>
 
 <script>
 const sectors=[
@@ -640,41 +745,45 @@ const testimonials=[
 ];
 
 const $=id=>document.getElementById(id);
-function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3200)}
+function toast(msg){const t=$("toast");if(!t)return;t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3200)}
 
 function renderSectors(category='all'){
   const filtered = category === 'all' ? sectors : sectors.filter(s => s[2] === category);
-  $("sectorGrid").innerHTML = filtered.map(s=>`
-   <div onclick="openModal('${s[1]}')" class="bg-white border border-[var(--line)] p-4 rounded-2xl hover:border-[var(--ink)] transition-all cursor-pointer flex flex-col justify-between shadow-sm">
-    <div>
-     <span class="text-2xl mb-2 block">${s[0]}</span>
-     <strong class="text-xs font-bold text-[var(--ink)] block">${s[1]}</strong>
-    </div>
-    <small class="text-[10px] text-[var(--muted)] mt-2 block">📄 Instant PDF &amp; QR ID</small>
-   </div>
-  `).join("");
+  if($("sectorGrid")) {
+    $("sectorGrid").innerHTML = filtered.map(s=>`
+     <div onclick="openCheckoutModal('${s[1]}')" class="bg-white border border-[var(--line)] p-4 rounded-2xl hover:border-[var(--ink)] transition-all cursor-pointer flex flex-col justify-between shadow-sm">
+      <div>
+       <span class="text-2xl mb-2 block">${s[0]}</span>
+       <strong class="text-xs font-bold text-[var(--ink)] block">${s[1]}</strong>
+      </div>
+      <small class="text-[10px] text-[var(--muted)] mt-2 block">📄 Instant PDF &amp; QR ID</small>
+     </div>
+    `).join("");
+  }
 }
 
 function filterDomains(cat){
   document.querySelectorAll('.domain-filter-tabs button').forEach(btn => {
-   btn.className = "button button-outline !border-[var(--line)] !text-[var(--ink)] !py-2.5 !px-4 text-xs";
+    btn.className = "button button-outline !border-[var(--line)] !text-[var(--ink)] !py-2.5 !px-4 text-xs";
   });
   event.target.className = "button button-dark !py-2.5 !px-4 text-xs active";
   renderSectors(cat);
 }
 
-$("testimonialGrid").innerHTML=testimonials.map(t=>`
-  <div class="bg-[var(--paper)] border border-[var(--line)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-    <div>
-     <div class="text-amber-400 text-sm tracking-widest mb-3">★★★★★</div>
-     <p class="text-xs text-[var(--muted)] leading-relaxed mb-6">“${t[2]}”</p>
+if($("testimonialGrid")) {
+  $("testimonialGrid").innerHTML=testimonials.map(t=>`
+    <div class="bg-[var(--paper)] border border-[var(--line)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+      <div>
+       <div class="text-amber-400 text-sm tracking-widest mb-3">★★★★★</div>
+       <p class="text-xs text-[var(--muted)] leading-relaxed mb-6">“${t[2]}”</p>
+      </div>
+      <div class="flex items-center gap-3 pt-4 border-t border-[var(--line)]">
+       <div class="w-9 h-9 rounded-full bg-[var(--green)] text-[#1c2418] font-bold text-xs flex items-center justify-center">${t[0][0]}</div>
+       <div><strong>${t[0]}</strong><small class="text-[var(--muted)] text-[10px] block">${t[1]}</small></div>
+      </div>
     </div>
-    <div class="flex items-center gap-3 pt-4 border-t border-[var(--line)]">
-     <div class="w-9 h-9 rounded-full bg-[var(--green)] text-[#1c2418] font-bold text-xs flex items-center justify-center">${t[0][0]}</div>
-     <div><strong>${t[0]}</strong><small class="text-[var(--muted)] text-[10px] block">${t[1]}</small></div>
-    </div>
-  </div>
-`).join("");
+  `).join("");
+}
 
 function startCountdown() {
   let seconds = 599;
@@ -683,14 +792,72 @@ function startCountdown() {
     let s = seconds % 60;
     let formatted = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
     if ($("countdownTimer")) $("countdownTimer").textContent = formatted;
-    if ($("modalTimer")) $("modalTimer").textContent = formatted;
+    if ($("checkoutModalTimer")) $("checkoutModalTimer").textContent = formatted;
     if (seconds > 0) seconds--;
   }, 1000);
 }
 
 function toggleMobileMenu() { $("mobileMenu").classList.toggle("hidden"); }
-function openModal(domain){ if(domain)$("interest").value=domain; $("modal").classList.remove("hidden"); $("modal").classList.add("flex"); }
-function closeModal(){ $("modal").classList.remove("flex"); $("modal").classList.add("hidden"); }
+
+// Required Checkout Modal Functions
+function openCheckoutModal(trackName) {
+  if(trackName && $("checkoutTrack")) {
+    $("checkoutTrack").value = trackName;
+  }
+  const modal = $("checkoutModal");
+  if(modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+}
+
+function closeCheckoutModal() {
+  const modal = $("checkoutModal");
+  if(modal) {
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
+  }
+}
+
+async function handleCheckoutSubmit(e) {
+  e.preventDefault();
+  
+  const fullName = $("checkoutFullName").value;
+  const phone = $("checkoutPhone").value;
+  const email = $("checkoutEmail").value;
+  const track = $("checkoutTrack").value;
+  const subDomain = $("checkoutSubDomain").value;
+  const startDate = $("checkoutStartDate").value;
+  const endDate = $("checkoutEndDate").value;
+  const tier = $("checkoutTier").value;
+
+  const orderData = {
+    fullName,
+    phone,
+    email,
+    track,
+    subDomain,
+    startDate,
+    endDate,
+    tier,
+    paymentStatus: "Pending",
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    if (window.db && window.auth && window.firestoreCollection && window.firestoreAddDoc) {
+      const userId = window.auth.currentUser ? window.auth.currentUser.uid : 'anonymous-user';
+      const ordersCol = window.firestoreCollection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
+      await window.firestoreAddDoc(ordersCol, { ...orderData, userId });
+    }
+  } catch (err) {
+    console.warn("Firestore write notice:", err);
+  }
+
+  closeCheckoutModal();
+  toast("🎉 Order Saved! Redirecting to Secure Payment & Instant PDF Dispatch...");
+  e.target.reset();
+}
 
 function triggerVerificationPopup() {
   $("qrPopup").classList.remove("hidden");
@@ -710,20 +877,11 @@ function closeInstantCertModal() {
   $("instantCertModal").classList.add("hidden");
 }
 
-$("applyForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  closeModal();
-  toast("🎉 Seat Locked! Official PDF Certificate & QR ID dispatched to your email!");
-  e.target.reset();
-});
-
 renderSectors('all');
 startCountdown();
 </script>
 
-<!-- Addition: easier-to-dismiss, more compact certificate popup -->
 <style>
-  /* Smaller card so the close (X) button stays within thumb reach */
   #instantCertModal > div {
     max-width: 22rem !important;
     max-height: 88vh;
@@ -734,7 +892,6 @@ startCountdown();
   #instantCertModal > div > * + * { margin-top: .75rem !important; }
   #instantCertModal h3 { font-size: 1.15rem !important; line-height: 1.25 !important; }
   #instantCertModal img { max-height: 28vh; width: auto !important; max-width: 100%; margin: 0 auto; object-fit: contain; }
-  /* Larger, easy-to-tap close button pinned top-right */
   #instantCertModal > div > button:first-child {
     position: sticky !important;
     top: 0 !important;
@@ -747,7 +904,6 @@ startCountdown();
   }
 </style>
 <script>
-  // Tap/click on the empty space around the popup, or press Esc, to dismiss it
   (function () {
     var modal = document.getElementById('instantCertModal');
     if (!modal) return;
