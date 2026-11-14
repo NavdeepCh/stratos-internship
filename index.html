@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stratos Global Technologies — Official Summer Internship & Instant Certification Portal</title>
+<title>Stratos NAVA Technologies — Official Summer Internship & Instant Certification Portal</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Manrope:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -646,7 +646,7 @@
       🏆 Instant PDF Certificate Dispatch Active
     </div>
 
-    <h3 class="text-2xl sm:text-3xl font-black text-[var(--ink)]">Buddy Your Verfied Instant Certificate is Ready</h3>
+    <h3 class="text-2xl sm:text-3xl font-black text-[var(--ink)]">Your Verified Instant Certificate is Ready</h3>
     <p class="text-xs text-[var(--muted)] leading-relaxed max-w-md mx-auto">Select <strong>Tier 2 (₹199)</strong> or <strong>Tier 3 (₹299)</strong> to receive your verified digital certificate and secure QR ID delivered instantly.</p>
     
     <!-- Certificate Graphic Mockup Preview -->
@@ -674,23 +674,25 @@
 <!-- Toast notification element -->
 <div id="toast" class="toast fixed bottom-6 left-1/2 -translate-x-1/2 bg-[var(--dark)] text-white text-xs font-bold px-6 py-3.5 rounded-xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[60]">test</div>
 
-<!-- Firebase CDN Scripts -->
+<!-- Firebase CDN Scripts with Your Exact Config -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'stratos-global-tech-default';
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-    apiKey: "AIzaSyDefaultKeyForStratosPortal",
-    authDomain: "stratos-global.firebaseapp.com",
-    projectId: "stratos-global",
-    storageBucket: "stratos-global.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef"
+  // Your exact Firebase project configuration from your screenshot
+  const firebaseConfig = {
+    apiKey: "AIzaSyD2KQsok35B0s7i9YkuUAvXgTbpo3n8M",
+    authDomain: "stratos-global-edu.firebaseapp.com",
+    projectId: "stratos-global-edu",
+    storageBucket: "stratos-global-edu.firebasestorage.app",
+    messagingSenderId: "624610729269",
+    appId: "1:624610729269:web:436da7b3e46a5b7de7c07c",
+    measurementId: "G-HYZJ8YM99H"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'stratos-global-edu';
+  const app = initializeApp(firebaseConfig, "stratos-global-edu");
   const db = getFirestore(app);
   const auth = getAuth(app);
 
