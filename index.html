@@ -728,9 +728,17 @@
       
       <div class="flex gap-3 pt-2">
         <button type="button" onclick="closeCheckoutModal()" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-1/3 justify-center">Cancel</button>
-        <button type="submit" class="button button-green w-2/3 justify-center">Proceed to Secure Payment →</button>
+        <button id="checkoutSubmitButton" type="submit" class="button button-green w-2/3 justify-center">Submit Registration →</button>
       </div>
     </form>
+    <div id="checkoutStatus" role="status" aria-live="polite" class="hidden mt-4 rounded-xl border p-4 text-sm"></div>
+    <div id="checkoutSuccess" role="status" aria-live="polite" class="hidden text-center py-5">
+      <div class="text-5xl mb-3" aria-hidden="true">✅</div>
+      <h4 class="text-xl font-black text-emerald-800">Successfully submitted!</h4>
+      <p class="text-sm text-slate-600 mt-2">Your internship registration has been saved. Payment is still pending verification.</p>
+      <p class="text-xs text-slate-500 mt-3">Registration ID: <strong id="checkoutSuccessId" class="break-all"></strong></p>
+      <button type="button" onclick="closeCheckoutModal()" class="button button-green mt-5 justify-center w-full">Done</button>
+    </div>
   </div>
 </div>
 
@@ -903,29 +911,71 @@ function toggleMobileMenu() { $("mobileMenu").classList.toggle("hidden"); }
 
 // Required Checkout Modal Functions
 function openCheckoutModal(trackName) {
-  if(trackName && $("checkoutTrack")) {
-    $("checkoutTrack").value = trackName;
-  }
+  if (trackName && $("checkoutTrack")) $("checkoutTrack").value = trackName;
+  $("checkoutForm").classList.remove("hidden");
+  $("checkoutSuccess").classList.add("hidden");
+  $("checkoutStatus").classList.add("hidden");
   const modal = $("checkoutModal");
-  if(modal) {
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 }
 
 function closeCheckoutModal() {
   const modal = $("checkoutModal");
-  if(modal) {
+  if (modal) {
     modal.classList.remove("flex");
     modal.classList.add("hidden");
+  }
+}
+
+function setCheckoutStatus(message, kind = "loading") {
+  const status = $("checkoutStatus");
+  status.className = "mt-4 rounded-xl border p-4 text-sm " + (
+    kind === "error" ? "bg-red-50 border-red-200 text-red-800" :
+    "bg-blue-50 border-blue-200 text-blue-900"
+  );
+  status.innerHTML = "";
+  if (kind === "loading") {
+    const spinner = document.createElement("span");
+    spinner.className = "inline-block w-4 h-4 mr-2 align-middle border-2 border-blue-600 border-t-transparent rounded-full animate-spin";
+    spinner.setAttribute("aria-hidden", "true");
+    status.appendChild(spinner);
+  }
+  status.appendChild(document.createTextNode(message));
+}
+
+async function notifyRegistration(orderId, user) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch(
+      "https://stratos-email-notifications.navadeepch2005.workers.dev/registration-notification",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderId }),
+        signal: controller.signal
+      }
+    );
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) console.warn("Registration saved, notification not accepted:", response.status, result.message);
+    else console.info("Registration notification accepted:", orderId);
+  } catch (error) {
+    console.warn("Registration saved, but notification could not be confirmed:", error);
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 async function handleCheckoutSubmit(e) {
   e.preventDefault();
   const form = e.currentTarget;
-  const submitButton = form.querySelector('button[type="submit"]');
-  if (submitButton?.disabled) return;
+  const button = $("checkoutSubmitButton");
+  if (button.disabled) return;
 
   const fullName = $("checkoutFullName").value.trim();
   const phone = $("checkoutPhone").value.trim();
@@ -937,74 +987,59 @@ async function handleCheckoutSubmit(e) {
   const tier = $("checkoutTier").value;
 
   if (!fullName || !phone || !email || !track || !subDomain || !startDate || !endDate || !tier) {
-    toast("Please complete all registration fields.");
+    setCheckoutStatus("Please complete all registration fields.", "error");
     return;
   }
   if (endDate < startDate) {
-    toast("End date cannot be before the start date.");
+    setCheckoutStatus("End date cannot be before the start date.", "error");
     return;
   }
 
-  const orderData = {
-    fullName, phone, email, track, subDomain, startDate, endDate, tier,
-    paymentStatus: "Pending",
-    createdAt: new Date().toISOString()
-  };
-
-  const originalButtonText = submitButton?.innerHTML;
-  if (submitButton) {
-    submitButton.disabled = true;
-    submitButton.textContent = "Saving registration...";
-  }
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "Submitting...";
+  setCheckoutStatus("Saving your registration securely...");
 
   try {
-    if (!window.db || !window.auth || !window.firestoreCollection || !window.firestoreAddDoc || !window.firebaseAuthReady) {
-      throw new Error("Firebase is not ready. Please refresh and try again.");
+    if (!window.db || !window.firestoreCollection || !window.firestoreAddDoc || !window.firebaseAuthReady) {
+      throw new Error("Firebase is still loading. Please try again in a moment.");
     }
-
     const user = await window.firebaseAuthReady;
-    if (!user?.uid) throw new Error("Firebase sign-in was unsuccessful.");
+    if (!user?.uid) throw new Error("Firebase sign-in failed. Refresh and try again.");
 
-    const ordersCol = window.firestoreCollection(
+    const orders = window.firestoreCollection(
       window.db, "artifacts", window.appId, "public", "data", "orders"
     );
-    const savedOrder = await window.firestoreAddDoc(ordersCol, {
-      ...orderData,
+    const savedOrder = await window.firestoreAddDoc(orders, {
+      fullName, phone, email, track, subDomain, startDate, endDate, tier,
+      paymentStatus: "Pending",
+      createdAt: new Date().toISOString(),
       userId: user.uid
     });
 
     console.info("Registration saved to Firestore:", savedOrder.id);
-    // The order is saved first. Email notification failure must never create a duplicate order.
-    try {
-      const idToken = await user.getIdToken();
-      const notifyResponse = await fetch(
-        "https://stratos-email-notifications.navadeepch2005.workers.dev/registration-notification",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
-          body: JSON.stringify({ orderId: savedOrder.id })
-        }
-      );
-      const notifyResult = await notifyResponse.json().catch(() => ({}));
-      if (!notifyResponse.ok) {
-        console.warn("Registration saved, but notification was not accepted:", notifyResponse.status, notifyResult);
-      } else {
-        console.info("Registration notification:", notifyResult.status || "accepted");
-      }
-    } catch (notifyError) {
-      console.warn("Registration saved, but notification request failed:", notifyError);
-    }
-    closeCheckoutModal();
+    $("checkoutSuccessId").textContent = savedOrder.id;
+    form.classList.add("hidden");
+    $("checkoutStatus").classList.add("hidden");
+    $("checkoutSuccess").classList.remove("hidden");
     form.reset();
-    toast("Registration saved successfully! Payment is pending.");
-  } catch (err) {
-    console.error("Registration was NOT saved:", err);
-    toast("Unable to save registration. Please try again.");
+    toast("Registration submitted successfully!");
+
+    // Notification failure must not cause a second registration.
+    // Start the request after Firestore confirms the order.
+    void notifyRegistration(savedOrder.id, user);
+  } catch (error) {
+    console.error("Registration was NOT saved:", error);
+    const isPermissionError = error?.code === "permission-denied" ||
+      /insufficient permissions/i.test(error?.message || "");
+    setCheckoutStatus(isPermissionError
+      ? "Registration could not be saved: Firestore permission denied. Please contact support."
+      : "Registration could not be saved. Please try again. " + (error?.message || ""), "error");
   } finally {
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.innerHTML = originalButtonText;
-    }
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.innerHTML = originalLabel;
   }
 }
 
