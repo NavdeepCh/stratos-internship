@@ -1,0 +1,30 @@
+STRATOS REGISTRATION NOTIFICATIONS - DEPLOYMENT
+
+1. Backup the current Cloudflare Worker code before replacing it.
+2. Replace the code of Worker stratos-email-notifications with worker.js and Deploy.
+3. In Cloudflare Worker Settings > Variables and Secrets, confirm:
+   BREVO_API_KEY = valid Brevo transactional API key (Secret)
+   GOOGLE_SERVICE_ACCOUNT_JSON = full Google service account JSON (Secret)
+   NOTIFY_TO_EMAIL = stratosedu.notifications@proton.me (optional text variable)
+   Do not put service account credentials in index.html or share them in chat.
+4. Replace your Cloudflare Pages site's index.html with the included index.html.
+5. Make one NEW test registration with valid fields, then check:
+   Browser DevTools > Network > registration-notification > HTTP 200
+   Cloudflare Worker Logs for Brevo accepted notification
+   Proton inbox/spam and Brevo transactional logs for delivery status.
+6. If browser Firestore save fails with 'Missing or insufficient permissions', fix Firebase Auth and Firestore rules first. The Worker cannot email an order that wasn't saved.
+
+WHAT IT DOES
+- Saves order in existing Firestore path artifacts/stratos-global-edu/public/data/orders.
+- Uses signed-in user's Firebase ID token to request notification.
+- Worker validates Firebase token and fetches saved order from Firestore using service-account permissions.
+- Worker checks ownership, uses a private Firestore receipt to avoid repeated sends, and sends admin notification through Brevo.
+- No D1, no browser API keys, no UI modifications.
+
+LIMITATIONS
+- Brevo accepting an email is not proof it reached the mailbox.
+- Email is a registration notification, not proof of payment or certificate issuance.
+- A failed notification can be retried by calling the endpoint again with the same authenticated order; the website does not automatically retry on subsequent visits.
+- If the Worker crashes after creating a receipt but before Brevo acceptance, an administrator may need to inspect/delete the stale receipt to retry.
+- Cloudflare/Google/Brevo quotas and DNS sender authentication affect reliability.
+- This Worker only accepts requests from https://stratos-internship.pages.dev in browsers; change ALLOWED_ORIGIN if you move domains.

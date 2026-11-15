@@ -974,6 +974,26 @@ async function handleCheckoutSubmit(e) {
     });
 
     console.info("Registration saved to Firestore:", savedOrder.id);
+    // The order is saved first. Email notification failure must never create a duplicate order.
+    try {
+      const idToken = await user.getIdToken();
+      const notifyResponse = await fetch(
+        "https://stratos-email-notifications.navadeepch2005.workers.dev/registration-notification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+          body: JSON.stringify({ orderId: savedOrder.id })
+        }
+      );
+      const notifyResult = await notifyResponse.json().catch(() => ({}));
+      if (!notifyResponse.ok) {
+        console.warn("Registration saved, but notification was not accepted:", notifyResponse.status, notifyResult);
+      } else {
+        console.info("Registration notification:", notifyResult.status || "accepted");
+      }
+    } catch (notifyError) {
+      console.warn("Registration saved, but notification request failed:", notifyError);
+    }
     closeCheckoutModal();
     form.reset();
     toast("Registration saved successfully! Payment is pending.");
