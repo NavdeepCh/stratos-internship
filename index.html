@@ -774,7 +774,7 @@
 <!-- Firebase CDN Scripts with Your Exact Config -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   // Your exact Firebase project configuration from your screenshot
@@ -800,17 +800,20 @@
       } else {
         await signInAnonymously(auth);
       }
+      return auth.currentUser;
     } catch (err) {
-      console.warn("Auth initialization note:", err);
+      console.error("Firebase authentication failed:", err);
+      throw err;
     }
   }
-  initAuth();
 
   window.db = db;
   window.auth = auth;
   window.firestoreCollection = collection;
   window.firestoreAddDoc = addDoc;
   window.appId = appId;
+  window.firebaseAuthReady = initAuth();
+  window.firebaseAuthReady.catch(() => {});
 </script>
 
 <script>
@@ -920,42 +923,69 @@ function closeCheckoutModal() {
 
 async function handleCheckoutSubmit(e) {
   e.preventDefault();
-  
-  const fullName = $("checkoutFullName").value;
-  const phone = $("checkoutPhone").value;
-  const email = $("checkoutEmail").value;
+  const form = e.currentTarget;
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton?.disabled) return;
+
+  const fullName = $("checkoutFullName").value.trim();
+  const phone = $("checkoutPhone").value.trim();
+  const email = $("checkoutEmail").value.trim();
   const track = $("checkoutTrack").value;
   const subDomain = $("checkoutSubDomain").value;
   const startDate = $("checkoutStartDate").value;
   const endDate = $("checkoutEndDate").value;
   const tier = $("checkoutTier").value;
 
+  if (!fullName || !phone || !email || !track || !subDomain || !startDate || !endDate || !tier) {
+    toast("Please complete all registration fields.");
+    return;
+  }
+  if (endDate < startDate) {
+    toast("End date cannot be before the start date.");
+    return;
+  }
+
   const orderData = {
-    fullName,
-    phone,
-    email,
-    track,
-    subDomain,
-    startDate,
-    endDate,
-    tier,
+    fullName, phone, email, track, subDomain, startDate, endDate, tier,
     paymentStatus: "Pending",
     createdAt: new Date().toISOString()
   };
 
-  try {
-    if (window.db && window.auth && window.firestoreCollection && window.firestoreAddDoc) {
-      const userId = window.auth.currentUser ? window.auth.currentUser.uid : 'anonymous-user';
-      const ordersCol = window.firestoreCollection(window.db, 'artifacts', window.appId, 'public', 'data', 'orders');
-      await window.firestoreAddDoc(ordersCol, { ...orderData, userId });
-    }
-  } catch (err) {
-    console.warn("Firestore write notice:", err);
+  const originalButtonText = submitButton?.innerHTML;
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Saving registration...";
   }
 
-  closeCheckoutModal();
-  toast("🎉 Order Saved! Redirecting to Secure Payment & Instant PDF Dispatch...");
-  e.target.reset();
+  try {
+    if (!window.db || !window.auth || !window.firestoreCollection || !window.firestoreAddDoc || !window.firebaseAuthReady) {
+      throw new Error("Firebase is not ready. Please refresh and try again.");
+    }
+
+    const user = await window.firebaseAuthReady;
+    if (!user?.uid) throw new Error("Firebase sign-in was unsuccessful.");
+
+    const ordersCol = window.firestoreCollection(
+      window.db, "artifacts", window.appId, "public", "data", "orders"
+    );
+    const savedOrder = await window.firestoreAddDoc(ordersCol, {
+      ...orderData,
+      userId: user.uid
+    });
+
+    console.info("Registration saved to Firestore:", savedOrder.id);
+    closeCheckoutModal();
+    form.reset();
+    toast("Registration saved successfully! Payment is pending.");
+  } catch (err) {
+    console.error("Registration was NOT saved:", err);
+    toast("Unable to save registration. Please try again.");
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.innerHTML = originalButtonText;
+    }
+  }
 }
 
 function triggerVerificationPopup() {
