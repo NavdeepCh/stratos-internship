@@ -67,9 +67,11 @@
   ]
 }
 </script>
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Early connections for the existing font and Firebase origins; no UI changes -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Manrope:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -148,34 +150,6 @@
     background: transparent;
   }
   .button-outline:hover { background: rgba(255,255,255,.08); }
-
-/* Mobile usability and rendering improvements. Desktop remains unchanged. */
-@media (max-width: 767px) {
-  html { scroll-padding-top: 112px; }
-  #home { padding-top: 2rem; padding-bottom: 3.5rem; }
-  #home h1 { overflow-wrap: break-word; }
-  #home .hero-keyword { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  #home .button { min-height: 48px; }
-  #mobileMenu a { min-height: 44px; display: flex; align-items: center; }
-  #mobileMenu button { min-height: 48px; }
-  #checkoutModal, #qrPopup, #instantCertModal { padding: 12px; }
-  #checkoutModal > div, #qrPopup > div { padding: 1.25rem; max-height: 90dvh; overflow-y: auto; overscroll-behavior: contain; }
-  #instantCertModal > div { max-height: 90dvh; overscroll-behavior: contain; }
-  #checkoutModal input, #checkoutModal select { min-height: 44px; font-size: 16px; }
-  #checkoutModal button, #qrPopup button { min-height: 44px; }
-  #sectorGrid > div { min-width: 0; overflow-wrap: anywhere; }
-  #verification img { max-width: 100%; }
-  .bottom-cta .button { min-height: 48px; }
-  #toast { width: calc(100% - 32px); max-width: 28rem; text-align: center; }
-}
-@media (max-width: 359px) {
-  #home h1 { font-size: 1.9rem; }
-  #checkoutModal > div, #qrPopup > div { padding: 1rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .animate-ping, .animate-pulse, .animate-bounce { animation: none !important; }
-}
 </style>
 </head>
 <body class="selection:bg-[#c9f36a] selection:text-black" onload="setTimeout(triggerInstantCertModal, 1500)">
@@ -505,7 +479,7 @@
                 <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Verified</span>
               </div>
               <div class="bg-white text-slate-900 rounded-2xl p-4 text-center shadow-2xl space-y-3 cursor-pointer hover:scale-105 transition-transform" onclick="triggerVerificationPopup()">
-                <img src="./Modern Professional Completion Certificate.png" alt="Sample certificate" loading="lazy" decoding="async" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Verified+Certificate'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm">
+                <img loading="lazy" decoding="async" fetchpriority="low" src="./Modern Professional Completion Certificate.png" alt="Sample certificate" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Verified+Certificate'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm">
                 <div class="pt-2">
                   <h4 class="text-sm font-black text-[var(--ink)]">Stratos Verified ID: #STR-88942</h4>
                   <span class="inline-block bg-emerald-100 text-emerald-700 text-xs font-extrabold px-3 py-1 rounded-full">✓ Verified PDF Sent to Email</span>
@@ -775,7 +749,7 @@
     <!-- Certificate Graphic Mockup Preview -->
     <div class="bg-white border-2 border-slate-300 rounded-2xl p-6 shadow-inner text-left space-y-3 relative overflow-hidden">
       <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-bl-xl">✓ OFFICIAL PREVIEW</div>
-      <img src="./Modern Professional Completion Certificate.png" alt="Official certificate preview" loading="lazy" decoding="async" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Certificate+Preview'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm bg-slate-50">
+      <img loading="eager" decoding="async" src="./Modern Professional Completion Certificate.png" alt="Official certificate preview" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Certificate+Preview'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm bg-slate-50">
       <div class="text-[10px] font-extrabold text-[var(--muted)] tracking-widest">STRATOS GLOBAL TECHNOLOGIES</div>
       <div class="text-base font-black text-[var(--ink)]">Certificate of Completion</div>
       <div class="text-[11px] text-slate-600">This is to certify that <strong class="text-blue-600">[Your Name Here]</strong> has successfully completed the Summer Internship Track.</div>
