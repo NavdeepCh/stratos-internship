@@ -341,7 +341,7 @@
 
       <div class="grid md:grid-cols-3 gap-8 text-left items-stretch">
         
-        <!-- Tier 1: ₹99 -->
+        <!-- Tier 1: ₹9999 -->
         <div class="bg-white border border-[var(--line)] rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:border-[var(--ink)] transition-all relative">
           <div>
             <div class="inline-block bg-[var(--paper)] text-[var(--ink)] text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-4">Standard Track</div>
@@ -364,7 +364,7 @@
 
           <div class="pt-8">
             <button onclick="openCheckoutModal('Software Development')" class="button button-dark w-full justify-center">
-              Enroll for ₹99 →
+              Enroll for ₹99999 →
             </button>
           </div>
         </div>
