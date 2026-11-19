@@ -735,7 +735,7 @@
     <div id="checkoutSuccess" role="status" aria-live="polite" class="hidden text-center py-5">
       <div class="text-5xl mb-3" aria-hidden="true">✅</div>
       <h4 class="text-xl font-black text-emerald-800">Successfully submitted!</h4>
-      <p class="text-sm text-slate-600 mt-2">Your internship registration has been saved. Payment is still pending verification.</p>
+      <p class="text-sm text-slate-600 mt-2">Your internship registration has been saved. Payment has not been initiated. Certificate has not been issued.</p>
       <p class="text-xs text-slate-500 mt-3">Registration ID: <strong id="checkoutSuccessId" class="break-all"></strong></p>
       <button type="button" onclick="closeCheckoutModal()" class="button button-green mt-5 justify-center w-full">Done</button>
     </div>
@@ -1002,40 +1002,47 @@ async function handleCheckoutSubmit(e) {
   setCheckoutStatus("Saving your registration securely...");
 
   try {
-    if (!window.db || !window.firestoreCollection || !window.firestoreAddDoc || !window.firebaseAuthReady) {
+    if (!window.firebaseAuthReady) {
       throw new Error("Firebase is still loading. Please try again in a moment.");
     }
     const user = await window.firebaseAuthReady;
-    if (!user?.uid) throw new Error("Firebase sign-in failed. Refresh and try again.");
-
-    const orders = window.firestoreCollection(
-      window.db, "artifacts", window.appId, "public", "data", "orders"
+    if (!user?.uid || typeof user.getIdToken !== "function") {
+      throw new Error("Firebase sign-in failed. Refresh and try again.");
+    }
+    const idToken = await user.getIdToken();
+    const response = await fetch(
+      "https://stratos-register.stratos-global.workers.dev/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ fullName, phone, email, track, subDomain, startDate, endDate, tier })
+      }
     );
-    const savedOrder = await window.firestoreAddDoc(orders, {
-      fullName, phone, email, track, subDomain, startDate, endDate, tier,
-      paymentStatus: "Pending",
-      createdAt: new Date().toISOString(),
-      userId: user.uid
-    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success || !result.registrationId || !result.orderId) {
+      throw new Error(result.message || `Registration API returned HTTP ${response.status}.`);
+    }
 
-    console.info("Registration saved to Firestore:", savedOrder.id);
-    $("checkoutSuccessId").textContent = savedOrder.id;
+    console.info("Registration saved via Worker:", result.registrationId);
+    $("checkoutSuccessId").textContent = result.registrationId;
     form.classList.add("hidden");
     $("checkoutStatus").classList.add("hidden");
     $("checkoutSuccess").classList.remove("hidden");
     form.reset();
-    toast("Registration submitted successfully!");
+    toast("Registration saved! Payment has not been initiated.");
 
-    // Notification failure must not cause a second registration.
-    // Start the request after Firestore confirms the order.
-    void notifyRegistration(savedOrder.id, user);
+    // Email Worker uses the internal Firestore order ID, not the public registration ID.
+    // Notification errors must never create another registration.
+    void notifyRegistration(result.orderId, user);
   } catch (error) {
-    console.error("Registration was NOT saved:", error);
-    const isPermissionError = error?.code === "permission-denied" ||
-      /insufficient permissions/i.test(error?.message || "");
-    setCheckoutStatus(isPermissionError
-      ? "Registration could not be saved: Firestore permission denied. Please contact support."
-      : "Registration could not be saved. Please try again. " + (error?.message || ""), "error");
+    console.error("Registration could not be confirmed:", error);
+    setCheckoutStatus(
+      "Registration could not be confirmed. Please contact support before retrying if you already submitted. " + (error?.message || ""),
+      "error"
+    );
   } finally {
     button.disabled = false;
     button.removeAttribute("aria-busy");
