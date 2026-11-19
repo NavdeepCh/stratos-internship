@@ -950,7 +950,7 @@ async function notifyRegistration(orderId, user) {
   try {
     const token = await user.getIdToken();
     const response = await fetch(
-      "https://stratos-email-notifications.navadeepch2005.workers.dev/registration-notification",
+      "https://stratos-email-notifications.stratos-global.workers.dev/registration-notification",
       {
         method: "POST",
         headers: {
