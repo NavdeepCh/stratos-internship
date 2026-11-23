@@ -54,17 +54,48 @@ async function verifyFirebaseIdToken(token){
 async function firestore(path,accessToken,options={}){
   return fetch(`${ROOT}/${path}`,{...options,headers:{Authorization:`Bearer ${accessToken}`,...(options.headers||{})}});
 }
+const escapeHtml=value=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function registrationHtml(order,orderId){
+  return `<!doctype html><html><body style="margin:0;background:#f5f5f0;font-family:Arial,sans-serif;color:#171b19">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px">
+  <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#fff;border-radius:16px;border:1px solid #d9ddd5;overflow:hidden">
+  <tr><td style="background:#202723;padding:22px;color:#fff;font-weight:800">STRATOS GLOBAL EDUCATION</td></tr>
+  <tr><td style="padding:28px"><h1 style="font-size:22px;margin:0 0 12px">📝 Registration Received</h1>
+  <p>Hello ${escapeHtml(field(order,'fullName')||'Student')},</p><p>We received your internship registration. Payment is currently <strong>⏳ Payment Pending</strong>.</p>
+  <div style="background:#f5f5f0;border-radius:12px;padding:16px;font-size:14px;line-height:1.8"><strong>Registration ID:</strong> ${escapeHtml(orderId)}<br><strong>Domain:</strong> ${escapeHtml(field(order,'track')||field(order,'domain'))}<br><strong>Tier:</strong> ${escapeHtml(field(order,'tier'))}</div>
+  <p style="font-size:13px;color:#6b716c">Complete the payment to confirm your registration.</p></td></tr></table></td></tr></table></body></html>`;
+}
+
+function paymentHtml(order,orderId){
+  const amount=Number(field(order,'paymentAmount')||0)/100;
+  const date=field(order,'paymentVerifiedAt')||new Date().toISOString();
+  return `<!doctype html><html><body style="margin:0;background:#f5f5f0;font-family:Arial,sans-serif;color:#171b19">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px">
+  <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#fff;border-radius:16px;border:1px solid #d9ddd5;overflow:hidden">
+  <tr><td style="background:#202723;padding:22px;color:#c9f36a;font-weight:800">STRATOS GLOBAL EDUCATION</td></tr>
+  <tr><td style="padding:28px"><h1 style="font-size:22px;margin:0 0 12px">✅ PAYMENT SUCCESSFULLY VERIFIED</h1>
+  <p>Hello ${escapeHtml(field(order,'fullName')||'Student')},</p><p>Your payment has been successfully verified and your internship registration is confirmed.</p>
+  <h2 style="font-size:14px;margin:24px 0 8px">REGISTRATION DETAILS</h2><div style="background:#f5f5f0;border-radius:12px;padding:16px;font-size:14px;line-height:1.9">
+  <strong>Registration ID:</strong> ${escapeHtml(orderId)}<br><strong>Internship Category:</strong> ${escapeHtml(field(order,'category')||'Internship')}<br><strong>Selected Domain:</strong> ${escapeHtml(field(order,'track')||field(order,'domain'))}<br><strong>Specialization:</strong> ${escapeHtml(field(order,'subDomain'))}<br><strong>Selected Tier:</strong> ${escapeHtml(field(order,'tier'))}</div>
+  <h2 style="font-size:14px;margin:24px 0 8px">PAYMENT DETAILS</h2><div style="background:#edf8dd;border:1px solid #c9f36a;border-radius:12px;padding:16px;font-size:14px;line-height:1.9">
+  <strong>Payment Status:</strong> ✅ PAID<br><strong>Payment Verification:</strong> ✅ VERIFIED<br><strong>Amount Paid:</strong> ₹${escapeHtml(amount.toFixed(2))}<br><strong>Payment Method:</strong> ${escapeHtml(field(order,'paymentMethod'))}<br><strong>Razorpay Payment ID:</strong> ${escapeHtml(field(order,'gatewayPaymentId'))}<br><strong>Payment Date:</strong> ${escapeHtml(date)}</div>
+  <h2 style="font-size:14px;margin:24px 0 8px">NEXT STEPS</h2><p>Sign in to your Stratos student dashboard to access your registered internship and complete the required activities.</p>
+  <p><strong>VIEW MY INTERNSHIPS</strong></p><p>Thank you for choosing Stratos Global Education.<br><strong>Stratos Support Team</strong></p></td></tr></table></td></tr></table></body></html>`;
+}
+
 async function notify(request,env,origin){
   if(!env.BREVO_API_KEY||!env.GOOGLE_SERVICE_ACCOUNT_JSON) return json({error:'Worker secrets not configured'},500,origin);
   const match=/^Bearer (.+)$/.exec(request.headers.get('Authorization')||'');
   if(!match) return json({error:'Firebase authentication required'},401,origin);
   let user;
   try {user=await verifyFirebaseIdToken(match[1]);}
-  catch(e){console.warn('Firebase authentication rejected:',e.message);return json({error:'Invalid Firebase authentication'},401,origin);}
+  catch(e){return json({error:'Invalid Firebase authentication'},401,origin);}
   let body;
   try {body=await request.json();}catch{return json({error:'Invalid JSON'},400,origin);}
   const orderId=body?.orderId;
-  if(typeof orderId!=='string'||!/^[a-zA-Z0-9]{8,100}$/.test(orderId)) return json({error:'Invalid order ID'},400,origin);
+  const event=body?.event==='payment'?'payment':'registration';
+  if(typeof orderId!=='string'||!/^SGE-\d{2}-INT-\d{6}$/.test(orderId)) return json({error:'Invalid registration ID'},400,origin);
   const token=await googleToken(env);
   const orderResponse=await firestore(`${ORDERS}/${orderId}`,token);
   if(orderResponse.status===404) return json({error:'Order not found'},404,origin);
@@ -72,27 +103,23 @@ async function notify(request,env,origin){
   const order=await orderResponse.json();
   if(field(order,'userId')!==user.sub) return json({error:'Order ownership mismatch'},403,origin);
   if(!field(order,'email')||!field(order,'fullName')) return json({error:'Incomplete order'},422,origin);
-  // One marker per order. Atomic create prevents concurrent duplicate sends.
-  const markerUrl=`${ROOT}/${MARKERS}?documentId=${encodeURIComponent(orderId)}`;
-  const marker=await fetch(markerUrl,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({fields:{orderId:{stringValue:orderId},status:{stringValue:'processing'},createdAt:{timestampValue:new Date().toISOString()}}})});
-  if(marker.status===409) return json({status:'already_processed'},200,origin);
-  if(!marker.ok) throw Error(`Notification marker creation HTTP ${marker.status}`);
-  let accepted=false;
-  try {
-    const details=[['Order ID',orderId],['Name',field(order,'fullName')],['Email',field(order,'email')],['Phone',field(order,'phone')],['Track',field(order,'track')],['Sub-domain',field(order,'subDomain')],['Tier',field(order,'tier')],['Start',field(order,'startDate')],['End',field(order,'endDate')],['Payment',field(order,'paymentStatus')||'Pending']];
-    const content='New Stratos internship registration\n\n'+details.map(([k,v])=>`${k}: ${v}`).join('\n')+'\n\nPayment is not confirmed by this notification.';
-    const brevo=await fetch('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'Content-Type':'application/json','api-key':env.BREVO_API_KEY},body:JSON.stringify({sender:{name:'Stratos Global Edu',email:'ravipullala22@gmail.com'},to:[{email:env.NOTIFY_TO_EMAIL||'stratosedu.notifications@proton.me'}],subject:`New Stratos registration: ${orderId}`,textContent:content})});
-    if(!brevo.ok){console.error('Brevo rejected notification:',brevo.status,(await brevo.text()).slice(0,500));return json({error:'Email provider rejected notification'},502,origin);}
-    accepted=true;
-    console.info('Brevo accepted notification for order',orderId);
-    return json({status:'accepted',orderId},200,origin);
-  } finally {
-    if(!accepted){
-      // Allow another attempt if Brevo explicitly failed. A crash after acceptance may still need manual reconciliation.
-      const cleanup=await firestore(`${MARKERS}/${orderId}`,token,{method:'DELETE'});
-      if(!cleanup.ok) console.error('Unable to release notification marker',cleanup.status);
-    }
+  if(event==='payment'&&(field(order,'paymentStatus')!=='Paid'||field(order,'paymentVerified')!=='true')) return json({error:'Payment is not verified'},409,origin);
+
+  const markerId=`${orderId}:${event}`;
+  const markerResponse=await firestore(`${MARKERS}/${markerId}`,token,{method:'GET'});
+  if(markerResponse.ok) return json({status:'already_processed',orderId,event},200,origin);
+  const markerCreate=await firestore(`${MARKERS}/${markerId}`,token,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{orderId:{stringValue:orderId},event:{stringValue:event},status:{stringValue:'processing'},createdAt:{timestampValue:new Date().toISOString()}}})});
+  if(!markerCreate.ok) throw Error(`Notification marker creation HTTP ${markerCreate.status}`);
+
+  const studentEmail=field(order,'email');
+  const subject=event==='payment'?`✅ Payment Confirmed | Stratos — ${orderId}`:`📝 Registration Received | Stratos — ${orderId}`;
+  const html=event==='payment'?paymentHtml(order,orderId):registrationHtml(order,orderId);
+  const brevo=await fetch('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'Content-Type':'application/json','api-key':env.BREVO_API_KEY},body:JSON.stringify({sender:{name:'Stratos Global Edu',email:'ravipullala22@gmail.com'},to:[{email:studentEmail},{email:env.NOTIFY_TO_EMAIL||'stratosedu.notifications@proton.me'}],subject,htmlContent:html})});
+  if(!brevo.ok){
+    await firestore(`${MARKERS}/${markerId}`,token,{method:'DELETE'});
+    return json({error:'Email provider rejected notification'},502,origin);
   }
+  return json({status:'accepted',orderId,event},200,origin);
 }
 export default {
   async fetch(request,env){
