@@ -93,13 +93,15 @@ export async function onRequestPost(context) {
   })[tier];
   // Temporary testing mode: webhook verification accepts ₹1 for every tier.
   const verifiedAmount = 100;
-  if (!expectedAmount || payment.amount !== verifiedAmount || payment.currency !== "INR" || order.currency !== "INR") {
-    return Response.json({received:true,amountMismatch:true});
-  }
-
   const captured = event.event === "payment.captured" && payment.status === "captured";
   const failed = event.event === "payment.failed";
   const refunded = event.event === "refund.processed" || payment.status === "refunded";
+  if (captured && (!expectedAmount || payment.amount !== verifiedAmount || payment.currency !== "INR" || order.currency !== "INR")) {
+    return Response.json({received:true,amountMismatch:true});
+  }
+  if (field(registration,"paymentStatus") === "Paid" && (failed || refunded)) {
+    return Response.json({received:true,processed:false,reason:"paid-state-must-not-be-downgraded"});
+  }
   const now = new Date().toISOString();
   const fields = captured ? {
     paymentProvider:"razorpay",
