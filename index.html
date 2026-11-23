@@ -74,6 +74,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Manrope:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -973,6 +974,70 @@ async function notifyRegistration(orderId, user) {
   }
 }
 
+function getTierAmount(tier) {
+  if (tier.includes("₹99")) return 9900;
+  if (tier.includes("₹199")) return 19900;
+  if (tier.includes("₹299")) return 29900;
+  return 0;
+}
+
+async function openRazorpayCheckout({ orderId, amount, currency, keyId, registrationId, user }) {
+  if (!window.Razorpay) throw new Error("Razorpay checkout could not load. Refresh and try again.");
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      key: keyId,
+      amount,
+      currency,
+      name: "Stratos Virtual Internships",
+      description: "Internship registration",
+      order_id: orderId,
+      prefill: {
+        name: $("checkoutFullName").value.trim(),
+        email: $("checkoutEmail").value.trim(),
+        contact: $("checkoutPhone").value.trim()
+      },
+      theme: { color: "#c9f36a" },
+      handler: async function (response) {
+        try {
+          const token = await user.getIdToken();
+          const verifyResponse = await fetch("/api/verify-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              registrationId
+            })
+          });
+          const result = await verifyResponse.json().catch(() => ({}));
+          if (!verifyResponse.ok || !result.success) {
+            throw new Error(result.error || "Payment verification failed.");
+          }
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          reject(new Error("Payment cancelled."));
+        }
+      }
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.on("payment.failed", function (response) {
+      reject(new Error(response?.error?.description || "Payment failed."));
+    });
+    razorpay.open();
+  });
+}
+
 async function handleCheckoutSubmit(e) {
   e.preventDefault();
   const form = e.currentTarget;
@@ -994,6 +1059,12 @@ async function handleCheckoutSubmit(e) {
   }
   if (endDate < startDate) {
     setCheckoutStatus("End date cannot be before the start date.", "error");
+    return;
+  }
+
+  const amount = getTierAmount(tier);
+  if (amount < 100) {
+    setCheckoutStatus("The selected tier is invalid.", "error");
     return;
   }
 
@@ -1029,12 +1100,43 @@ async function handleCheckoutSubmit(e) {
     }
 
     console.info("Registration saved via Worker:", result.registrationId);
+    const token = await user.getIdToken();
+    setCheckoutStatus("Creating your secure payment order...");
+    const orderResponse = await fetch("/api/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        tier,
+        amount,
+        receipt: result.registrationId
+      })
+    });
+    const orderResult = await orderResponse.json().catch(() => ({}));
+    if (!orderResponse.ok || !orderResult.order_id) {
+      throw new Error(orderResult.error || "Could not create the payment order.");
+    }
+
+    setCheckoutStatus("Opening secure Razorpay checkout...");
+    await openRazorpayCheckout({
+      orderId: orderResult.order_id,
+      amount: orderResult.amount,
+      currency: orderResult.currency,
+      keyId: orderResult.key_id,
+      registrationId: result.registrationId,
+      user
+    });
+
     $("checkoutSuccessId").textContent = result.registrationId;
     form.classList.add("hidden");
     $("checkoutStatus").classList.add("hidden");
     $("checkoutSuccess").classList.remove("hidden");
+    $("checkoutSuccess").querySelector("p").textContent =
+      "Your payment has been verified and your internship registration is confirmed.";
     form.reset();
-    toast("Registration saved! Payment has not been initiated.");
+    toast("Payment verified successfully!");
 
     // Email Worker uses the internal Firestore order ID, not the public registration ID.
     // Notification errors must never create another registration.

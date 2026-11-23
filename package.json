@@ -1,0 +1,20 @@
+{
+  "name": "navdeepch-automatic-winner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "firebase-config.js",
+  "scripts": {
+    "dev": "wrangler pages dev . --compatibility-date=2026-11-23",
+    "test": "node --check functions/api/create-order.js && node --check functions/api/verify-payment.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^4.166.0"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.8"
+  }
+}
