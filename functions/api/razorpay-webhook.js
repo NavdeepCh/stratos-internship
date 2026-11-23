@@ -91,7 +91,9 @@ export async function onRequestPost(context) {
     "Tier 2: Instant PDF Certificate & QR ID (₹199)":19900,
     "Tier 3: Stratos VIP Career Accelerator (₹299)":29900
   })[tier];
-  if (!expectedAmount || payment.amount !== expectedAmount || payment.currency !== "INR" || order.currency !== "INR") {
+  const testMode = env.RAZORPAY_KEY_ID.startsWith("rzp_test_");
+  const verifiedAmount = testMode ? 100 : expectedAmount;
+  if (!expectedAmount || payment.amount !== verifiedAmount || payment.currency !== "INR" || order.currency !== "INR") {
     return Response.json({received:true,amountMismatch:true});
   }
 

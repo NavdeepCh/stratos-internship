@@ -18,7 +18,8 @@ export async function onRequestPost(context) {
     "Tier 3: Stratos VIP Career Accelerator (₹299)": 29900
   };
   const tier = typeof body.tier === "string" ? body.tier : "";
-  const amount = tierAmounts[tier];
+  const testMode = env.RAZORPAY_KEY_ID.startsWith("rzp_test_");
+  const amount = testMode ? 100 : tierAmounts[tier];
   if (!Number.isSafeInteger(amount) || amount < 100) {
     return Response.json({ error: "Invalid internship tier amount" }, { status: 400 });
   }
