@@ -33,7 +33,12 @@ export async function onRequestPost(context) {
   if (!/^SGE-\d{2}-INT-\d{6}$/.test(registrationId || "")) return Response.json({error:"Invalid registration ID"}, {status:400});
 
   if (body.checkOnly) {
-    const accessToken = await googleAccessToken(env);
+    let accessToken;
+    try {
+      accessToken = await googleAccessToken(env);
+    } catch (error) {
+      return Response.json({ error: error.message || "Payment status service unavailable" }, { status: 500 });
+    }
     const root = "https://firestore.googleapis.com/v1/projects/stratos-global-edu/databases/(default)/documents";
     const registrationPath = `${root}/artifacts/stratos-global-edu/public/data/orders/${encodeURIComponent(registrationId)}`;
     const registrationResponse = await fetch(registrationPath,{headers:{Authorization:`Bearer ${accessToken}`}});

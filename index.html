@@ -1478,6 +1478,9 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
           }
           resolve(result);
         } catch (error) {
+          if (/payment verification|signature|captured|verification/i.test(error.message || "")) {
+            void checkExistingPaymentStatus();
+          }
           reject(error);
         }
       },
@@ -1604,8 +1607,11 @@ async function handleCheckoutSubmit(e) {
     void notifyRegistration(result.orderId, user, "payment");
   } catch (error) {
     console.error("Registration could not be confirmed:", error);
+    const verificationPending = /payment verification|verification failed|captured|signature/i.test(error.message || "");
     setCheckoutStatus(
-      "Registration could not be confirmed. Please contact support before retrying if you already submitted. " + (error?.message || ""),
+      verificationPending
+        ? "Payment may have completed. Verification is pending. Use Check Payment Status before retrying or paying again."
+        : "Registration could not be confirmed. Please contact support before retrying if you already submitted. " + (error?.message || ""),
       "error"
     );
   } finally {
