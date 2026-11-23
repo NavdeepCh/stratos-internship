@@ -12,13 +12,14 @@ export async function onRequestPost(context) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const amount = Number(body.amount);
+  const tierAmounts = {
+    "Tier 1: Basic Virtual Internship (₹99)": 9900,
+    "Tier 2: Instant PDF Certificate & QR ID (₹199)": 19900,
+    "Tier 3: Stratos VIP Career Accelerator (₹299)": 29900
+  };
+  const tier = typeof body.tier === "string" ? body.tier : "";
+  const amount = tierAmounts[tier];
   if (!Number.isSafeInteger(amount) || amount < 100) {
-    return Response.json({ error: "Amount must be at least 100 paise" }, { status: 400 });
-  }
-
-  const allowedAmounts = [9900, 19900, 29900];
-  if (!allowedAmounts.includes(amount)) {
     return Response.json({ error: "Invalid internship tier amount" }, { status: 400 });
   }
 

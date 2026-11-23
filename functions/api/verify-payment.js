@@ -23,7 +23,7 @@ function timingSafeEqual(first, second) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  if (!env.RAZORPAY_KEY_SECRET) {
+  if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
     return Response.json({ error: "Razorpay credentials are not configured" }, { status: 500 });
   }
 
@@ -48,6 +48,24 @@ export async function onRequestPost(context) {
 
   if (!timingSafeEqual(expected, signature)) {
     return Response.json({ error: "Payment signature mismatch" }, { status: 400 });
+  }
+
+  const authorization = "Basic " + btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`);
+  let paymentResponse;
+  try {
+    paymentResponse = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(paymentId)}`, {
+      headers: { "Authorization": authorization }
+    });
+  } catch {
+    return Response.json({ error: "Razorpay verification service unavailable" }, { status: 500 });
+  }
+
+  const payment = await paymentResponse.json().catch(() => ({}));
+  if (!paymentResponse.ok) {
+    return Response.json({ error: "Could not verify payment with Razorpay" }, { status: 502 });
+  }
+  if (payment.order_id !== orderId || payment.status !== "captured") {
+    return Response.json({ error: "Payment is not captured for this order" }, { status: 400 });
   }
 
   return Response.json({
