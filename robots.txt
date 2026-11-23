@@ -1,8 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://internships.stratosglobal.tech/sitemap.xml
-
-Disallow: /sign-in
-Disallow: /my-internships
-Disallow: /admin
+Sitemap: https://stratos-internship.pages.dev/sitemap.xml
