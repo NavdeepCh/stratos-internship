@@ -317,6 +317,138 @@
     #home { padding-top: 2.5rem; }
     #home h1 { font-size: 2.55rem; }
   }
+
+  .internship-category-section {
+    padding: 4.5rem 1rem 2.5rem;
+    background: #090c0b;
+  }
+  .internship-category-heading {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+  .internship-category-heading span {
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .14em;
+  }
+  .internship-category-heading h2 {
+    color: #f3f7f4;
+    margin-top: .6rem;
+  }
+  .internship-category-grid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .internship-category-card {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+    border: 1px solid #2a352e;
+    border-radius: 1.25rem;
+    background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.01)), #111613;
+    text-decoration: none;
+    color: #eef4f0;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .internship-category-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(201,243,106,.7);
+    box-shadow: 0 18px 45px rgba(0,0,0,.34);
+  }
+  .internship-category-card.featured {
+    border: 2px solid var(--green);
+  }
+  .category-card-badge {
+    align-self: flex-start;
+    padding: .38rem .65rem;
+    border-radius: 999px;
+    background: #202923;
+    color: var(--green);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .12em;
+  }
+  .featured .category-card-badge {
+    background: var(--green);
+    color: #151b17;
+  }
+  .internship-category-card h3 {
+    font-size: 1.35rem;
+    margin: 1.2rem 0 .65rem;
+  }
+  .internship-category-card p {
+    color: #9aa69f;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+  .category-card-meta {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #2a352e;
+    color: #cbd5cf;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .category-card-action {
+    margin-top: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .instant-mobile-arrow {
+    display: none;
+  }
+  @media (max-width: 1023px) {
+    .internship-category-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width: 640px) {
+    .internship-category-section { padding: 3rem 1rem 1.5rem; }
+    .internship-category-grid { grid-template-columns: 1fr; }
+    .internship-category-card { min-height: 220px; }
+    .instant-mobile-arrow {
+      display: flex;
+      width: 100%;
+      max-width: 18rem;
+      margin: 1.5rem auto 0;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .instant-mobile-arrow span {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--green);
+      border-radius: 50%;
+      animation: stratos-bounce 1.8s infinite;
+    }
+  }
+  @keyframes stratos-bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .instant-mobile-arrow span { animation: none; }
+  }
+  #instant-certificate { scroll-margin-top: 150px; }
 </style>
 </head>
 <body class="selection:bg-[#c9f36a] selection:text-black" onload="setTimeout(triggerInstantCertModal, 1500)">
@@ -483,8 +615,35 @@
     </div>
   </section>
 
+  <!-- Four Internship Categories -->
+  <section class="internship-category-section" aria-labelledby="internship-category-heading">
+    <div class="internship-category-heading">
+      <span>CHOOSE YOUR INTERNSHIP</span>
+      <h2 id="internship-category-heading">One platform. Four ways to build experience.</h2>
+    </div>
+    <div class="internship-category-grid">
+      <article class="internship-category-card">
+        <div><span class="category-card-badge">2–4 WEEKS</span><h3>Short-Term Internship</h3><p>Practical short-duration project work with guided assignments and evaluation.</p></div>
+        <div><div class="category-card-meta">Practical project · Guided learning</div><a class="category-card-action" href="/short-term-internships"><span>Explore Short-Term</span><span>→</span></a></div>
+      </article>
+      <article class="internship-category-card">
+        <div><span class="category-card-badge">8–12 WEEKS</span><h3>Long-Term Internship</h3><p>Extended learning, advanced assignments and a structured capstone project.</p></div>
+        <div><div class="category-card-meta">Milestones · Capstone project</div><a class="category-card-action" href="/long-term-internships"><span>Explore Long-Term</span><span>→</span></a></div>
+      </article>
+      <article class="internship-category-card">
+        <div><span class="category-card-badge">SEASONAL</span><h3>Summer Internship</h3><p>Seasonal project-based programs with scheduled milestones and practical work.</p></div>
+        <div><div class="category-card-meta">Cohort work · Project milestones</div><a class="category-card-action" href="/summer-internships"><span>Explore Summer</span><span>→</span></a></div>
+      </article>
+      <article class="internship-category-card featured">
+        <div><span class="category-card-badge">FEATURED</span><h3>Instant Internship Certificate</h3><p>Explore virtual tracks, PDF certificates and QR credential previews.</p></div>
+        <div><div class="category-card-meta">Certificate options · QR verification</div><a class="category-card-action" href="#instant-certificate"><span>Explore Instant</span><span>↓</span></a></div>
+      </article>
+    </div>
+    <a class="instant-mobile-arrow" href="#instant-certificate" aria-label="Explore instant certificate, tiers and domains"><span>↓</span> Explore Instant, Tiers &amp; Domains</a>
+  </section>
+
   <!-- Search-friendly, visible guidance for students -->
-  <section id="certificate-guide" class="py-14 bg-[var(--paper)] border-t border-[var(--line)]" aria-labelledby="certificate-guide-heading">
+  <section id="instant-certificate" class="py-14 bg-[var(--paper)] border-t border-[var(--line)]" aria-labelledby="certificate-guide-heading">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 id="certificate-guide-heading" class="text-2xl sm:text-3xl font-black mb-4">Instant Quick Internship Certificate: Program Guide</h2>
       <p class="text-sm sm:text-base text-[var(--muted)] leading-relaxed mb-5">Searching for a quick internship certificate PDF or an online virtual internship certificate in India? Stratos lists self-paced tracks in software development, Java, Python, full-stack development, artificial intelligence, data science, cybersecurity, cloud computing and other domains. Explore the project tasks, eligibility and certificate completion requirements for each track before registering.</p>
@@ -535,7 +694,7 @@
 
           <div class="pt-8">
             <button onclick="openCheckoutModal('Software Development')" class="button button-dark w-full justify-center">
-              Enroll for ₹99999 →
+              Enroll for ₹99 →
             </button>
           </div>
         </div>
