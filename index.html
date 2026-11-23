@@ -1348,6 +1348,44 @@ function setCheckoutStatus(message, kind = "loading") {
     status.appendChild(spinner);
   }
   status.appendChild(document.createTextNode(message));
+  if (kind === "error" && window.lastRegistrationId) {
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "button button-green w-full justify-center mt-3";
+    retry.textContent = "Check Payment Status";
+    retry.addEventListener("click", checkExistingPaymentStatus);
+    status.appendChild(retry);
+  }
+}
+
+async function checkExistingPaymentStatus() {
+  const registrationId = window.lastRegistrationId;
+  if (!registrationId) return;
+  setCheckoutStatus("Checking the existing payment status...");
+  try {
+    const response = await fetch("/api/payment-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ registrationId, checkOnly: true })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Could not check payment status.");
+    if (result.paymentVerified && result.status === "Paid") {
+      $("checkoutSuccessId").textContent = registrationId;
+      $("checkoutForm").classList.add("hidden");
+      $("checkoutStatus").classList.add("hidden");
+      $("checkoutSuccess").classList.remove("hidden");
+      $("checkoutSuccess").querySelector("p").textContent =
+        "Your payment has been verified and your internship registration is confirmed.";
+      window.lastRegistrationId = null;
+      window.lastRegistrationOrderId = null;
+      toast("Payment verified successfully!");
+      return;
+    }
+    setCheckoutStatus(`Payment status: ${result.status || "Pending"}. No duplicate payment has been created.`, "error");
+  } catch (error) {
+    setCheckoutStatus(error.message || "Could not check payment status.", "error");
+  }
 }
 
 async function notifyRegistration(orderId, user, event = "registration") {

@@ -90,8 +90,6 @@ export async function onRequestPost(context) {
     return Response.json({ error: "Payment is not captured for this order" }, { status: 400 });
   }
 
-  if (payment.currency !== "INR") return Response.json({ error: "Razorpay currency mismatch" }, { status: 400 });
-
   let patchResponse;
   try {
     const accessToken = await googleAccessToken(env);

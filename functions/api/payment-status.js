@@ -18,7 +18,7 @@ async function googleAccessToken(env) {
 function field(document, name) {
   const value = document.fields?.[name];
   if (!value) return "";
-  return value.stringValue ?? value.integerValue ?? value.timestampValue ?? "";
+  return value.stringValue ?? value.integerValue ?? value.timestampValue ?? (typeof value.booleanValue === "boolean" ? String(value.booleanValue) : "");
 }
 
 export async function onRequestPost(context) {
@@ -31,6 +31,22 @@ export async function onRequestPost(context) {
   const orderId = body.razorpay_order_id;
   const paymentId = body.razorpay_payment_id;
   if (!/^SGE-\d{2}-INT-\d{6}$/.test(registrationId || "")) return Response.json({error:"Invalid registration ID"}, {status:400});
+
+  if (body.checkOnly) {
+    const accessToken = await googleAccessToken(env);
+    const root = "https://firestore.googleapis.com/v1/projects/stratos-global-edu/databases/(default)/documents";
+    const registrationPath = `${root}/artifacts/stratos-global-edu/public/data/orders/${encodeURIComponent(registrationId)}`;
+    const registrationResponse = await fetch(registrationPath,{headers:{Authorization:`Bearer ${accessToken}`}});
+    if (!registrationResponse.ok) return Response.json({error:"Registration not found"}, {status:404});
+    const registration = await registrationResponse.json();
+    return Response.json({
+      status:field(registration,"paymentStatus") || "Pending",
+      paymentVerified:field(registration,"paymentVerified") === "true",
+      gatewayOrderId:field(registration,"gatewayOrderId"),
+      gatewayPaymentId:field(registration,"gatewayPaymentId"),
+      registrationStatus:field(registration,"registrationStatus")
+    });
+  }
   if (!["Cancelled","Failed","Pending"].includes(status)) return Response.json({error:"Invalid payment status"}, {status:400});
 
   if (status === "Failed" && paymentId) {
