@@ -150,6 +150,173 @@
     background: transparent;
   }
   .button-outline:hover { background: rgba(255,255,255,.08); }
+
+  /* Stratos neon SaaS visual treatment */
+  body {
+    --ink: #e9f0ec;
+    --muted: #9aa69f;
+    --paper: #090c0b;
+    --white: #111613;
+    --line: #26312b;
+    --dark: #111613;
+    --dark-green: #1d2a22;
+    background:
+      radial-gradient(circle at 78% 8%, rgba(201,243,106,.09), transparent 24rem),
+      radial-gradient(circle at 12% 32%, rgba(91,157,255,.05), transparent 28rem),
+      #090c0b;
+  }
+
+  header,
+  .bg-\[\#f5f5f0\],
+  .bg-\[var\(--paper\)\],
+  section.bg-\[var\(--paper\)\] {
+    background: rgba(9,12,11,.96) !important;
+  }
+
+  header {
+    border-color: var(--line) !important;
+  }
+
+  #home,
+  #certificate-guide,
+  #sectors,
+  #how,
+  #pricing,
+  #stories,
+  footer {
+    position: relative;
+  }
+
+  #home {
+    background:
+      linear-gradient(135deg, rgba(201,243,106,.025), transparent 48%),
+      radial-gradient(circle at 82% 50%, rgba(201,243,106,.09), transparent 22rem),
+      #090c0b !important;
+  }
+
+  #home h1,
+  #pricing h2,
+  #verification h2,
+  #sectors h2,
+  #how h2,
+  #stories h2,
+  .bottom-cta h2 {
+    color: #f3f7f4;
+  }
+
+  #home h1 {
+    max-width: 760px;
+  }
+
+  #home h1 .hero-keyword {
+    background: var(--green);
+    color: #111612;
+    box-shadow: 0 0 28px rgba(201,243,106,.12);
+  }
+
+  #home > div,
+  #pricing > div,
+  #verification > div,
+  #sectors > div,
+  #how > div,
+  #stories > div {
+    border-radius: 1.5rem;
+  }
+
+  .bg-white,
+  .bg-\[\#e3e8e1\],
+  .bg-slate-50,
+  .bg-\[var\(--white\)\] {
+    background-color: #111613 !important;
+  }
+
+  .text-\[var\(--ink\)],
+  .text-\[var\(--muted\)],
+  .text-slate-700,
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400 {
+    color: inherit !important;
+  }
+
+  .border-\[var\(--line\)],
+  .border-slate-200,
+  .border-slate-100 {
+    border-color: var(--line) !important;
+  }
+
+  .shadow-sm,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
+  }
+
+  #home [class*="rounded-3xl"],
+  #pricing [class*="rounded-3xl"],
+  #verification [class*="rounded-3xl"],
+  #sectors [class*="rounded-"],
+  #how [class*="rounded-"],
+  #stories [class*="rounded-"] {
+    border-color: var(--line);
+  }
+
+  #pricing,
+  #sectors,
+  #how,
+  #stories {
+    background: #090c0b !important;
+  }
+
+  #pricing [class*="rounded-3xl"],
+  #sectors [class*="rounded-2xl"],
+  #how [class*="rounded-2xl"],
+  #stories [class*="rounded-2xl"] {
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,0)),
+      #111613 !important;
+  }
+
+  #pricing [class*="rounded-3xl"] {
+    border-color: #2a352e;
+  }
+
+  #pricing [class*="rounded-3xl"]:hover,
+  #sectors [class*="rounded-2xl"]:hover,
+  #how [class*="rounded-2xl"]:hover,
+  #stories [class*="rounded-2xl"]:hover {
+    border-color: rgba(201,243,106,.55) !important;
+  }
+
+  #verification > div > div,
+  .bottom-cta {
+    background:
+      radial-gradient(circle at 88% 15%, rgba(201,243,106,.12), transparent 18rem),
+      #111613 !important;
+  }
+
+  footer {
+    background: #070907 !important;
+    border-top: 1px solid var(--line);
+  }
+
+  .button-green {
+    box-shadow: 0 10px 30px rgba(201,243,106,.10);
+  }
+
+  .button-green:hover {
+    box-shadow: 0 14px 34px rgba(201,243,106,.18);
+  }
+
+  .button-dark {
+    background: #1a211d;
+    border: 1px solid #344138;
+  }
+
+  @media (max-width: 767px) {
+    body { background: #090c0b; }
+    #home { padding-top: 2.5rem; }
+    #home h1 { font-size: 2.55rem; }
+  }
 </style>
 </head>
 <body class="selection:bg-[#c9f36a] selection:text-black" onload="setTimeout(triggerInstantCertModal, 1500)">
