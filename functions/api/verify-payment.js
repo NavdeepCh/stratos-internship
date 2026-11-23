@@ -17,61 +17,61 @@ function timingSafeEqual(first, second) {
   for (let index = 0; index < first.length; index++) {
     mismatch |= first.charCodeAt(index) ^ second.charCodeAt(index);
   }
-
-  const base64url = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/, "");
-  const pemToBytes = pem => Uint8Array.from(atob(pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "")), c => c.charCodeAt(0));
-
-  async function googleAccessToken(env) {
-    const account = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON || env.FIRESTORE_SERVICE_ACCOUNT_JSON);
-    if (account.project_id !== "stratos-global-edu") throw new Error("Service account project mismatch");
-    const now = Math.floor(Date.now() / 1000);
-    const encoder = new TextEncoder();
-    const head = base64url(encoder.encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
-    const body = base64url(encoder.encode(JSON.stringify({
-      iss: account.client_email,
-      scope: "https://www.googleapis.com/auth/datastore",
-      aud: "https://oauth2.googleapis.com/token",
-      iat: now,
-      exp: now + 3500
-    })));
-    const key = await crypto.subtle.importKey("pkcs8", pemToBytes(account.private_key), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
-    const assertion = `${head}.${body}.${base64url(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, encoder.encode(`${head}.${body}`)))}`;
-    const response = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ grant_type: "urn:ietf:params:jwt-bearer", assertion })
-    });
-    if (!response.ok) throw new Error("Could not obtain Firestore access token");
-    return (await response.json()).access_token;
-  }
-
-  function field(document, name) {
-    const value = document.fields?.[name];
-    if (!value) return "";
-    return value.stringValue ?? value.integerValue ?? value.timestampValue ?? "";
-  }
-
-  async function patchFirestoreOrder(registrationId, fields, env) {
-    const accessToken = await googleAccessToken(env);
-    const root = "https://firestore.googleapis.com/v1/projects/stratos-global-edu/databases/(default)/documents";
-    const updates = {};
-    for (const [key, value] of Object.entries(fields)) {
-      updates[key] = typeof value === "number"
-        ? { integerValue: String(value) }
-        : typeof value === "boolean"
-          ? { booleanValue: value }
-          : key.endsWith("At")
-            ? { timestampValue: value }
-            : { stringValue: String(value) };
-    }
-    const mask = `?${Object.keys(updates).map(key => `updateMask.fieldPaths=${encodeURIComponent(key)}`).join("&")}`;
-    return fetch(`${root}/artifacts/stratos-global-edu/public/data/orders/${encodeURIComponent(registrationId)}${mask}`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: updates })
-    });
-  }
   return mismatch === 0;
+}
+
+const base64url = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/, "");
+const pemToBytes = pem => Uint8Array.from(atob(pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "")), c => c.charCodeAt(0));
+
+async function googleAccessToken(env) {
+  const account = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON || env.FIRESTORE_SERVICE_ACCOUNT_JSON);
+  if (account.project_id !== "stratos-global-edu") throw new Error("Service account project mismatch");
+  const now = Math.floor(Date.now() / 1000);
+  const encoder = new TextEncoder();
+  const head = base64url(encoder.encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
+  const body = base64url(encoder.encode(JSON.stringify({
+    iss: account.client_email,
+    scope: "https://www.googleapis.com/auth/datastore",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3500
+  })));
+  const key = await crypto.subtle.importKey("pkcs8", pemToBytes(account.private_key), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const assertion = `${head}.${body}.${base64url(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, encoder.encode(`${head}.${body}`)))}`;
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "urn:ietf:params:jwt-bearer", assertion })
+  });
+  if (!response.ok) throw new Error("Could not obtain Firestore access token");
+  return (await response.json()).access_token;
+}
+
+function field(document, name) {
+  const value = document.fields?.[name];
+  if (!value) return "";
+  return value.stringValue ?? value.integerValue ?? value.timestampValue ?? "";
+}
+
+async function patchFirestoreOrder(registrationId, fields, env) {
+  const accessToken = await googleAccessToken(env);
+  const root = "https://firestore.googleapis.com/v1/projects/stratos-global-edu/databases/(default)/documents";
+  const updates = {};
+  for (const [key, value] of Object.entries(fields)) {
+    updates[key] = typeof value === "number"
+      ? { integerValue: String(value) }
+      : typeof value === "boolean"
+        ? { booleanValue: value }
+        : key.endsWith("At")
+          ? { timestampValue: value }
+          : { stringValue: String(value) };
+  }
+  const mask = `?${Object.keys(updates).map(key => `updateMask.fieldPaths=${encodeURIComponent(key)}`).join("&")}`;
+  return fetch(`${root}/artifacts/stratos-global-edu/public/data/orders/${encodeURIComponent(registrationId)}${mask}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: updates })
+  });
 }
 
 export async function onRequestPost(context) {
