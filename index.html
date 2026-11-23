@@ -1350,7 +1350,7 @@ function setCheckoutStatus(message, kind = "loading") {
   status.appendChild(document.createTextNode(message));
 }
 
-async function notifyRegistration(orderId, user) {
+async function notifyRegistration(orderId, user, event = "registration") {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
@@ -1363,7 +1363,7 @@ async function notifyRegistration(orderId, user) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, event }),
         signal: controller.signal
       }
     );
@@ -1541,7 +1541,8 @@ async function handleCheckoutSubmit(e) {
     form.reset();
     toast("Payment verified successfully!");
 
-    void notifyRegistration(result.orderId, user);
+    void notifyRegistration(result.orderId, user, "registration");
+    void notifyRegistration(result.orderId, user, "payment");
   } catch (error) {
     console.error("Registration could not be confirmed:", error);
     setCheckoutStatus(

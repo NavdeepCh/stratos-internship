@@ -45,19 +45,6 @@ function timingSafeEqual(first, second) {
     return (await response.json()).access_token;
   }
 
-  async function verifyFirebaseToken(request, env) {
-    const match = /^Bearer (.+)$/.exec(request.headers.get("Authorization") || "");
-    if (!match) return null;
-    const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(env.FIREBASE_API_KEY)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: match[1] })
-    });
-    if (!response.ok) return null;
-    const result = await response.json();
-    return result.users?.[0]?.localId || null;
-  }
-
   function field(document, name) {
     const value = document.fields?.[name];
     if (!value) return "";
@@ -113,9 +100,6 @@ export async function onRequestPost(context) {
     return Response.json({ error: "Invalid registration ID" }, { status: 400 });
   }
 
-  const firebaseUid = await verifyFirebaseToken(request, env);
-  if (!firebaseUid) return Response.json({ error: "Firebase authentication required" }, { status: 401 });
-
   const expected = await hmacSha256(
     env.RAZORPAY_KEY_SECRET,
     `${orderId}|${paymentId}`
@@ -158,10 +142,6 @@ export async function onRequestPost(context) {
   });
   if (!storedResponse.ok) return Response.json({ error: "Registration not found" }, { status: 404 });
   const stored = await storedResponse.json();
-  if (field(stored, "userId") && field(stored, "userId") !== firebaseUid) {
-    return Response.json({ error: "Registration ownership mismatch" }, { status: 403 });
-  }
-
   const now = new Date().toISOString();
   const tier = field(stored, "tier");
   const expectedAmount = ({
