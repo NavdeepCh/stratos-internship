@@ -755,7 +755,7 @@
     <p class="text-xs text-[var(--muted)] leading-relaxed max-w-md mx-auto">Select <strong>Tier 2 (₹199)</strong> or <strong>Tier 3 (₹299)</strong> to receive your verified digital certificate and secure QR ID delivered instantly.</p>
     
     <!-- Certificate Graphic Mockup Preview -->
-    <div class="bg-white border-2 border-slate-300 rounded-2xl p-6 shadow-inner text-left space-y-3 relative overflow-hidden">
+    <div class="instant-cert-preview bg-white border-2 border-slate-300 rounded-2xl p-6 shadow-inner text-left space-y-3 relative overflow-hidden">
       <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-bl-xl">✓ OFFICIAL PREVIEW</div>
       <img loading="eager" decoding="async" src="./Modern Professional Completion Certificate.png" alt="Official certificate preview" onerror="this.src='https://placehold.co/600x400/f5f5f0/171b19?text=Stratos+Certificate+Preview'" class="w-full h-auto rounded-xl border border-slate-200 shadow-sm bg-slate-50">
       <div class="text-[10px] font-extrabold text-[var(--muted)] tracking-widest">STRATOS GLOBAL TECHNOLOGIES</div>
@@ -1073,6 +1073,53 @@ startCountdown();
 </script>
 
 <style>
+  @media (max-width: 767px) {
+    #instantCertModal {
+      align-items: flex-end !important;
+      justify-content: flex-end !important;
+      padding: 1rem !important;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      pointer-events: none;
+    }
+    #instantCertModal > div {
+      width: min(20rem, calc(100vw - 2rem)) !important;
+      max-height: none;
+      margin: 0 !important;
+      padding: .85rem !important;
+      border-width: 2px !important;
+      border-radius: 1rem !important;
+      pointer-events: auto;
+      text-align: left !important;
+    }
+    #instantCertModal > div > button:first-child {
+      position: absolute !important;
+      top: .65rem !important;
+      right: .65rem !important;
+      width: 2rem !important;
+      height: 2rem !important;
+      font-size: 1rem !important;
+    }
+    #instantCertModal h3 {
+      padding-right: 2rem;
+      font-size: 1rem !important;
+    }
+    #instantCertModal p {
+      font-size: .7rem !important;
+      line-height: 1.4 !important;
+    }
+    #instantCertModal .instant-cert-preview {
+      display: none;
+    }
+    #instantCertModal > div > * + * {
+      margin-top: .6rem !important;
+    }
+    #instantCertModal .button {
+      padding: .7rem 1rem !important;
+      font-size: .65rem !important;
+    }
+  }
+
   #instantCertModal > div {
     max-width: 22rem !important;
     max-height: 88vh;
