@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Student Sign In | Stratos Virtual Internships</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Manrope:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#171b19; --muted:#6b716c; --green:#c9f36a; --paper:#f5f5f0; --line:#d9ddd5; }
+    body { margin:0; font-family:"DM Sans",sans-serif; color:var(--ink); background:var(--paper); }
+    h1,h2,h3 { font-family:"Manrope",sans-serif; letter-spacing:-.04em; }
+  </style>
+</head>
+<body>
+  <main class="min-h-screen flex items-center justify-center p-4">
+    <section class="w-full max-w-md bg-white border border-[var(--line)] rounded-3xl p-8 shadow-xl">
+      <a href="/" class="flex items-center gap-3 mb-8">
+        <img src="/stratos-logo.svg" alt="" class="w-12 h-12 rounded-xl">
+        <span class="font-black">STRATOS <small class="block text-[9px] tracking-widest text-[var(--muted)]">VIRTUAL INTERNSHIPS</small></span>
+      </a>
+      <h1 class="text-3xl font-black mb-2">Student Sign In</h1>
+      <p class="text-sm text-[var(--muted)] mb-6">Use the email address registered for your internship.</p>
+      <form id="signInForm" class="space-y-4">
+        <label class="block text-xs font-bold">Registered Email Address
+          <input id="signInEmail" type="email" required autocomplete="email" class="mt-2 w-full p-3 border border-[var(--line)] rounded-xl text-sm bg-slate-50">
+        </label>
+        <button type="submit" class="w-full bg-[var(--green)] text-[#1c2418] py-3 rounded-xl text-xs font-black uppercase">Send Secure Sign-In Link</button>
+      </form>
+      <p id="signInStatus" role="status" class="mt-4 text-sm text-[var(--muted)]"></p>
+    </section>
+  </main>
+  <script type="module">
+    import { completePasswordlessSignIn, sendPasswordlessLink } from "/js/firebase.js";
+    const form=document.querySelector("#signInForm");
+    const status=document.querySelector("#signInStatus");
+    form.addEventListener("submit",async(event)=>{
+      event.preventDefault();
+      status.textContent="Sending secure sign-in link...";
+      try{
+        await sendPasswordlessLink(document.querySelector("#signInEmail").value.trim());
+        status.textContent="Check your email and open the sign-in link.";
+      }catch(error){status.textContent=error.message||"Sign-in link could not be sent.";}
+    });
+    completePasswordlessSignIn().then((user)=>{
+      if(user) window.location.replace("/my-internships");
+    }).catch((error)=>{status.textContent=error.message||"Sign-in could not be completed.";});
+  </script>
+</body>
+</html>

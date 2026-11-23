@@ -69,6 +69,10 @@
   ]
 }
 </script>
+<script type="module">
+  import { renderPortalNav } from "/js/portal-shell.js";
+  renderPortalNav();
+</script>
 <!-- Early connections for the existing font and Firebase origins; no UI changes -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -192,7 +196,7 @@
     </nav>
 
     <div class="hidden md:flex items-center gap-3">
-      <button onclick="openCheckoutModal('Software Development')" class="button button-outline !border-[var(--line)] !text-[var(--ink)] py-2.5 px-4">Intern Login</button>
+      <span data-student-nav></span>
       <button onclick="openCheckoutModal('Artificial Intelligence & GenAI')" class="button button-green py-2.5 px-5">Claim Seat Now <span>→</span></button>
     </div>
 
@@ -208,7 +212,7 @@
     <a href="#verification" onclick="toggleMobileMenu()" class="block font-semibold text-slate-700 py-1">QR ID Verification</a>
     <a href="#how" onclick="toggleMobileMenu()" class="block font-semibold text-slate-700 py-1">How It Works</a>
     <div class="pt-3 border-t border-[var(--line)] flex flex-col gap-2">
-      <button onclick="openCheckoutModal('Software Development'); toggleMobileMenu();" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-full justify-center">Intern Login</button>
+      <span data-student-nav></span>
       <button onclick="openCheckoutModal('Artificial Intelligence & GenAI'); toggleMobileMenu();" class="button button-green w-full justify-center">Claim Seat Now</button>
     </div>
   </div>
