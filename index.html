@@ -1363,10 +1363,20 @@ async function checkExistingPaymentStatus() {
   if (!registrationId) return;
   setCheckoutStatus("Checking the existing payment status...");
   try {
+    const user = await window.firebaseAuthReady;
+    if (!user?.getIdToken) throw new Error("Please sign in to check your payment.");
+    const token = await user.getIdToken();
     const response = await fetch("/api/payment-status", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ registrationId, checkOnly: true })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        registrationId,
+        razorpay_order_id: window.lastRegistrationOrderId || undefined,
+        checkOnly: true
+      })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || "Could not check payment status.");
@@ -1443,6 +1453,14 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
   }
 
   return new Promise((resolve, reject) => {
+    let checkoutSettled = false;
+    let verificationStarted = false;
+    const settle = (error, value) => {
+      if (checkoutSettled) return;
+      checkoutSettled = true;
+      if (error) reject(error);
+      else resolve(value);
+    };
     const options = {
       key: keyId,
       amount,
@@ -1457,6 +1475,8 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
       },
       theme: { color: "#c9f36a" },
       handler: async function (response) {
+        verificationStarted = true;
+        setCheckoutStatus("Payment received by Razorpay. Verifying securely; do not pay again...");
         try {
           const token = await user.getIdToken();
           const verifyResponse = await fetch("/api/verify-payment", {
@@ -1476,18 +1496,16 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
           if (!verifyResponse.ok || !result.success) {
             throw new Error(result.error || "Payment verification failed.");
           }
-          resolve(result);
+          settle(null, result);
         } catch (error) {
-          if (/payment verification|signature|captured|verification/i.test(error.message || "")) {
-            void checkExistingPaymentStatus();
-          }
-          reject(error);
+          settle(error);
         }
       },
       modal: {
         ondismiss: function () {
+          if (verificationStarted || checkoutSettled) return;
           void reportCheckoutState("Cancelled");
-          reject(new Error("Payment cancelled."));
+          settle(new Error("Checkout closed. Check your existing payment status before trying again."));
         }
       }
     };
@@ -1496,8 +1514,9 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
     razorpay.on("payment.failed", function (response) {
       const gatewayPaymentId = response?.error?.metadata?.payment_id || "";
       const gatewayOrderId = response?.error?.metadata?.order_id || orderId;
+      if (verificationStarted || checkoutSettled) return;
       void reportCheckoutState("Failed", gatewayPaymentId, gatewayOrderId);
-      reject(new Error(response?.error?.description || "Payment failed."));
+      settle(new Error(response?.error?.description || "Payment failed."));
     });
     razorpay.open();
   });
@@ -1565,6 +1584,8 @@ async function handleCheckoutSubmit(e) {
     }
 
     console.info("Registration saved via Worker:", result.registrationId);
+    window.lastRegistrationId = result.registrationId;
+    window.lastRegistrationOrderId = null;
     const token = await user.getIdToken();
     setCheckoutStatus("Creating your secure payment order...");
     const orderResponse = await fetch("/api/create-order", {
@@ -1584,6 +1605,7 @@ async function handleCheckoutSubmit(e) {
       throw new Error(orderResult.error || "Could not create the payment order.");
     }
 
+    window.lastRegistrationOrderId = orderResult.order_id;
     setCheckoutStatus("Opening secure Razorpay checkout...");
     await openRazorpayCheckout({
       orderId: orderResult.order_id,
@@ -1601,17 +1623,18 @@ async function handleCheckoutSubmit(e) {
     $("checkoutSuccess").querySelector("p").textContent =
       "Your payment has been verified and your internship registration is confirmed.";
     form.reset();
+    window.lastRegistrationId = null;
+    window.lastRegistrationOrderId = null;
     toast("Payment verified successfully!");
 
     void notifyRegistration(result.orderId, user, "registration");
     void notifyRegistration(result.orderId, user, "payment");
   } catch (error) {
     console.error("Registration could not be confirmed:", error);
-    const verificationPending = /payment verification|verification failed|captured|signature/i.test(error.message || "");
     setCheckoutStatus(
-      verificationPending
-        ? "Payment may have completed. Verification is pending. Use Check Payment Status before retrying or paying again."
-        : "Registration could not be confirmed. Please contact support before retrying if you already submitted. " + (error?.message || ""),
+      window.lastRegistrationId
+        ? `Registration ${window.lastRegistrationId} was created, but payment confirmation is not yet verified. Do not pay again until you check its status. ${error?.message || ""}`
+        : `Registration was not completed. ${error?.message || "Please try again."}`,
       "error"
     );
   } finally {
