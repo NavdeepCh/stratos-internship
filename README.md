@@ -1,5 +1,15 @@
 # Stratos Student Portal Upgrade
 
+## Multi-category preview
+
+The feature branch provides the four public category routes:
+
+- `/`
+- `/short-term-internships`
+- `/long-term-internships`
+- `/summer-internships`
+- `/instant-internship-certificate`
+
 ## Repository status
 
 This workspace contains the public homepage and certificate portal, Razorpay Pages Functions, Firebase browser configuration, and a notification Worker. It does not contain the full production category-page source, deployed registration Worker source, Google Form URL, or Firebase admin custom-claim provisioning.

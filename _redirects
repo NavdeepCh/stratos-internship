@@ -1,4 +1,4 @@
-/sign-in /sign-in.html 200
-/my-internships /my-internships.html 200
-/my-internships/* /my-internships-detail.html 200
-/admin /admin.html 200
+ /admin /admin.html 200
+ /sign-in /sign-in.html 200
+ /my-internships /my-internships.html 200
+ /my-internships/* /my-internships-detail.html 200
