@@ -341,9 +341,19 @@
     .stratos-category, .floating-bubble-card { transition: none; animation: none; }
     .stratos-category:hover { transform: none; }
   }
+  #stratosBetaBuild {
+    position: fixed; top: max(6px, env(safe-area-inset-top)); left: 8px;
+    z-index: 100; pointer-events: none; display: inline-flex; align-items: center;
+    gap: 5px; padding: 5px 9px; border-radius: 999px;
+    background: #202723; color: #c9f36a; border: 1px solid #c9f36a;
+    font: 800 9px/1.2 "DM Sans", sans-serif; letter-spacing: .04em;
+    box-shadow: 0 2px 8px #0003;
+  }
+  #stratosBetaBuild .beta-dot { width: 6px; height: 6px; border-radius: 50%; background: #c9f36a; }
 </style>
 </head>
 <body class="selection:bg-[#c9f36a] selection:text-black" onload="setTimeout(triggerInstantCertModal, 2200)">
+<div id="stratosBetaBuild" aria-label="Beta stage, build 2026-11-24 B01"><span class="beta-dot" aria-hidden="true"></span>BETA STAGE · B01</div>
 
 <!-- Top Scarcity Urgency Banner -->
 <div class="bg-[#202723] text-white text-xs py-2.5 px-4 text-center font-bold sticky top-0 z-50 border-b border-[#39443a]">
@@ -1092,6 +1102,7 @@
         </select>
       </div>
       
+      <p class="text-xs font-semibold text-slate-700">Beta pricing: actual LIVE charge is ₹1 (100 paise) for every tier. Payment confirms registration only; completion certificates require verified completion.</p>
       <div class="flex gap-3 pt-2">
         <button type="button" onclick="closeCheckoutModal()" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-1/3 justify-center">Cancel</button>
         <button id="checkoutSubmitButton" type="submit" class="button button-green w-2/3 justify-center">Pay ₹1 &amp; Register →</button>
@@ -1366,7 +1377,7 @@ async function checkExistingPaymentStatus() {
     const user = await window.firebaseAuthReady;
     if (!user?.getIdToken) throw new Error("Please sign in to check your payment.");
     const token = await user.getIdToken();
-    const response = await fetch("/api/payment-status", {
+    const response = await fetch("https://stratos-payment.stratos-global.workers.dev/payment-status", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1440,7 +1451,7 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
 
   async function reportCheckoutState(status, gatewayPaymentId = "", gatewayOrderId = orderId) {
     try {
-      await fetch("/api/payment-status", {
+      await fetch("https://stratos-payment.stratos-global.workers.dev/payment-status", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${await user.getIdToken()}` },
         body: JSON.stringify({
@@ -1482,7 +1493,7 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
         setCheckoutStatus("Payment received by Razorpay. Verifying securely; do not pay again...");
         try {
           const token = await user.getIdToken();
-          const verifyResponse = await fetch("/api/verify-payment", {
+          const verifyResponse = await fetch("https://stratos-payment.stratos-global.workers.dev/verify-payment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1496,7 +1507,7 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
             })
           });
           const result = await verifyResponse.json().catch(() => ({}));
-          if (!verifyResponse.ok || !result.success) {
+          if (!verifyResponse.ok || result.success !== true || result.paymentVerified !== true || result.status !== "Paid") {
             throw new Error(result.error || "Payment verification failed.");
           }
           settle(null, result);
@@ -1593,7 +1604,7 @@ async function handleCheckoutSubmit(e) {
     window.lastRegistrationOrderId = null;
     const token = await user.getIdToken();
     setCheckoutStatus("Creating your secure payment order...");
-    const orderResponse = await fetch("/api/create-order", {
+    const orderResponse = await fetch("https://stratos-payment.stratos-global.workers.dev/create-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1610,6 +1621,9 @@ async function handleCheckoutSubmit(e) {
       throw new Error(orderResult.error || "Could not create the payment order.");
     }
 
+    if (orderResult.amount !== 100 || orderResult.currency !== "INR" || !orderResult.key_id?.startsWith("rzp_live_")) {
+      throw new Error("Unexpected payment configuration. Contact support before paying.");
+    }
     window.lastRegistrationOrderId = orderResult.order_id;
     setCheckoutStatus("Opening secure Razorpay checkout...");
     await openRazorpayCheckout({
