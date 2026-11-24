@@ -1094,7 +1094,7 @@
       
       <div class="flex gap-3 pt-2">
         <button type="button" onclick="closeCheckoutModal()" class="button button-outline !border-[var(--line)] !text-[var(--ink)] w-1/3 justify-center">Cancel</button>
-        <button id="checkoutSubmitButton" type="submit" class="button button-green w-2/3 justify-center">Submit Registration →</button>
+        <button id="checkoutSubmitButton" type="submit" class="button button-green w-2/3 justify-center">Pay ₹1 &amp; Register →</button>
       </div>
     </form>
     <div id="checkoutStatus" role="status" aria-live="polite" class="hidden mt-4 rounded-xl border p-4 text-sm"></div>
@@ -1348,7 +1348,7 @@ function setCheckoutStatus(message, kind = "loading") {
     status.appendChild(spinner);
   }
   status.appendChild(document.createTextNode(message));
-  if (kind === "error" && window.lastRegistrationId) {
+  if (kind === "error" && (window.lastRegistrationId || localStorage.getItem("stratosPendingRegistration"))) {
     const retry = document.createElement("button");
     retry.type = "button";
     retry.className = "button button-green w-full justify-center mt-3";
@@ -1359,7 +1359,7 @@ function setCheckoutStatus(message, kind = "loading") {
 }
 
 async function checkExistingPaymentStatus() {
-  const registrationId = window.lastRegistrationId;
+  const registrationId = window.lastRegistrationId || localStorage.getItem("stratosPendingRegistration");
   if (!registrationId) return;
   setCheckoutStatus("Checking the existing payment status...");
   try {
@@ -1387,9 +1387,12 @@ async function checkExistingPaymentStatus() {
       $("checkoutSuccess").classList.remove("hidden");
       $("checkoutSuccess").querySelector("p").textContent =
         "Your payment has been verified and your internship registration is confirmed.";
+      localStorage.removeItem("stratosPendingRegistration");
       window.lastRegistrationId = null;
       window.lastRegistrationOrderId = null;
       toast("Payment verified successfully!");
+      void notifyRegistration(registrationId,user,"registration");
+      void notifyRegistration(registrationId,user,"payment");
       return;
     }
     setCheckoutStatus(`Payment status: ${result.status || "Pending"}. No duplicate payment has been created.`, "error");
@@ -1439,7 +1442,7 @@ async function openRazorpayCheckout({ orderId, amount, currency, keyId, registra
     try {
       await fetch("/api/payment-status", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${await user.getIdToken()}` },
         body: JSON.stringify({
           registrationId,
           status,
@@ -1566,6 +1569,7 @@ async function handleCheckoutSubmit(e) {
     if (!user?.uid || typeof user.getIdToken !== "function") {
       throw new Error("Firebase sign-in failed. Refresh and try again.");
     }
+    if(localStorage.getItem("stratosPendingRegistration")){ window.lastRegistrationId=localStorage.getItem("stratosPendingRegistration"); throw new Error("Check your existing registration before paying again. Contact support if unpaid."); }
     const idToken = await user.getIdToken();
     const response = await fetch(
       "https://stratos-register.stratos-global.workers.dev/register",
@@ -1585,6 +1589,7 @@ async function handleCheckoutSubmit(e) {
 
     console.info("Registration saved via Worker:", result.registrationId);
     window.lastRegistrationId = result.registrationId;
+    localStorage.setItem("stratosPendingRegistration", result.registrationId);
     window.lastRegistrationOrderId = null;
     const token = await user.getIdToken();
     setCheckoutStatus("Creating your secure payment order...");
@@ -1596,7 +1601,7 @@ async function handleCheckoutSubmit(e) {
       },
       body: JSON.stringify({
         tier,
-        amount,
+        amount: 100,
         receipt: result.registrationId
       })
     });
@@ -1623,7 +1628,8 @@ async function handleCheckoutSubmit(e) {
     $("checkoutSuccess").querySelector("p").textContent =
       "Your payment has been verified and your internship registration is confirmed.";
     form.reset();
-    window.lastRegistrationId = null;
+    localStorage.removeItem("stratosPendingRegistration");
+      window.lastRegistrationId = null;
     window.lastRegistrationOrderId = null;
     toast("Payment verified successfully!");
 
