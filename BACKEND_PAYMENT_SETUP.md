@@ -1,53 +1,43 @@
-# Razorpay and Brevo Backend Setup
+# Dedicated Payment Worker Architecture
 
-## Root cause
+## Architecture
 
-The existing Razorpay verification endpoint confirmed the checkout signature and payment capture but did not patch Firestore. The existing notification Worker sent only one registration notification and used no separate payment confirmation marker.
+- Frontend: Cloudflare Pages
+- Registration Worker: `https://stratos-register.stratos-global.workers.dev/register`
+- Payment Worker: `https://stratos-payment.stratos-global.workers.dev`
+- Email Worker: `https://stratos-email-notifications.stratos-global.workers.dev/registration-notification`
 
-## Test status
+Keep Razorpay credentials, webhook secrets and Firebase service-account credentials on the dedicated Workers, never in Pages or frontend code.
 
-- Backend JavaScript syntax: passed
-- Reconciliation script: correctly entered dry-run and stopped without writing records because credentials were not supplied to the shell
-- No production payment or live charge was processed
+## Payment endpoints
 
-## Cloudflare Pages variables
+- `POST /create-order`
+- `POST /verify-payment`
+- `POST /payment-status`
+- `POST /webhook`
+
+The `/webhook` endpoint is server-to-server only.
+
+## Worker secrets
+
+Configure the names in the dedicated Payment Worker and existing Workers:
 
 - `RAZORPAY_KEY_ID`
 - `RAZORPAY_KEY_SECRET`
 - `RAZORPAY_WEBHOOK_SECRET`
+- `GOOGLE_SERVICE_ACCOUNT_JSON`
 - `FIREBASE_API_KEY`
-- `GOOGLE_SERVICE_ACCOUNT_JSON`
-
-The service-account JSON remains a server secret.
-
-## Razorpay webhook
-
-Configure in the Razorpay Dashboard:
-
-`https://internships.stratosglobal.tech/api/razorpay-webhook`
-
-Or use the deployed Pages domain:
-
-`https://stratos-internship.pages.dev/api/razorpay-webhook`
-
-Enable:
-
-- `payment.captured`
-- `payment.failed`
-- `refund.processed`
-
-Set the webhook secret to `RAZORPAY_WEBHOOK_SECRET`.
-
-## Brevo Worker variables
-
-Keep:
-
 - `BREVO_API_KEY`
-- `GOOGLE_SERVICE_ACCOUNT_JSON`
 - `NOTIFY_TO_EMAIL`
+
+Do not commit values.
 
 ## Deployment
 
-Deploy the Pages `functions/api/` directory for order, verification, and webhook routes.
+1. Deploy the `stratos-payment` Worker.
+2. Configure the LIVE Razorpay webhook URL:
+   `https://stratos-payment.stratos-global.workers.dev/webhook`
+3. Deploy Cloudflare Pages after confirming every frontend payment call uses the dedicated Worker.
+4. Deploy `worker.js` separately to `stratos-email-notifications` if notification code changes.
 
-The existing `worker.js` must be deployed separately to the `stratos-email-notifications` Cloudflare Worker.
+Payment success must be confirmed by server-side signature/capture verification and a durable Firestore payment update. Frontend callback values alone are not authoritative.
