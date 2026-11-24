@@ -386,9 +386,64 @@ main [id] { scroll-margin-top: 0 !important; }
 <style>
 .institution-logo{display:inline-flex;align-items:center;justify-content:center;width:44px;height:36px;flex-shrink:0;border:1px solid #cbd2c5;border-radius:7px;background:#f5f5f0;color:#29382c;font:800 10px/1 Manrope,sans-serif;letter-spacing:.03em}.institution-logo img{width:100%;height:100%;object-fit:contain}
 </style>
+<style>
+.b10-desktop-strip{display:none}
+@media(min-width:1024px){
+:root{--green:#c9f36a;--paper:#f5f4eb;--line:#d5d9cb}
+header{display:flex;flex-direction:column;background:#faf9f1!important;box-shadow:0 5px 24px #20272315}
+.b10-desktop-strip{order:-1;display:block;background:#202723;color:white;font-size:12px;font-weight:800}
+header>div:first-child{width:100%}.b10-topline{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px}
+.b10-pill{background:#c9f36a;color:#202723;padding:4px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.08em}
+.b10-ticker{display:flex;overflow:hidden;background:linear-gradient(100deg,#a32c32,#a64b12,#17654c);padding:7px 0;color:white}
+.b10-ticker-track{display:flex;width:max-content;flex-shrink:0;animation:b10-run 32s linear infinite}
+.b10-ticker-track span{white-space:nowrap;padding:0 24px;letter-spacing:.06em}
+.b10-ticker:hover .b10-ticker-track,.b10-ticker:focus-within .b10-ticker-track{animation-play-state:paused}
+@keyframes b10-run{to{transform:translateX(-50%)}}
+.b10-topline a{color:#c9f36a;text-decoration:underline;text-underline-offset:3px}
+.batch-chip{background:#202723!important;color:#c9f36a!important;box-shadow:0 4px 14px #20272330}
+#internship-categories{background:radial-gradient(ellipse at 85% 0%,#e1efc7,transparent 60%),#f5f4eb}
+main .stratos-category:not(.featured){background:#fffdf7!important;border-top:4px solid #e6b04c;box-shadow:0 8px 22px #20272312}
+main .stratos-category:nth-child(2){border-top-color:#d66a65}main .stratos-category:nth-child(3){border-top-color:#52a98a}
+main .stratos-category.featured{border-color:#c9f36a;box-shadow:0 10px 28px #20272338}
+main .stratos-category .cat-cta-btn{background:#e4f3bb}main .stratos-category.featured .cat-cta-btn,.button-green{background:#c9f36a!important}
+#pricing{background:linear-gradient(135deg,#fffdf7,#f0f4e6)!important}
+.preview-shortcuts>*{background:#edf3db;border-color:#c9d6ac}
+.b10-desktop-strip button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#floatingBubbleTimer{display:none}
+#bubbleUrgencyOffer{box-shadow:0 12px 35px #20272350}
+}
+@media(prefers-reduced-motion:reduce){.b10-ticker-track{animation:none!important}}
+</style>
+<style>.b10-desktop-copy{display:none}@media(min-width:1024px){.b10-mobile-copy{display:none}.b10-desktop-copy{display:inline}#internship-categories .mb-3 .h-1\.5{display:none}}</style>
+<style>@media(min-width:1024px){#checkoutModalTimer{display:none}}</style>
+<style>
+/* B11: decorative brand watermark, desktop only. */
+@media (min-width: 1024px) {
+  #internship-categories, #pricing { position: relative; isolation: isolate; overflow: clip; }
+  #internship-categories::before, #pricing::before {
+    content: ""; position: absolute; pointer-events: none; z-index: -1;
+    background: url('/stratos-logo.svg') center / contain no-repeat;
+  }
+  #internship-categories::before {
+    width: clamp(380px, 43vw, 680px); aspect-ratio: 1;
+    right: -3%; top: -24%; opacity: .065; transform: rotate(-16deg);
+  }
+  #pricing::before {
+    width: clamp(340px, 36vw, 560px); aspect-ratio: 1;
+    left: -10%; bottom: -12%; opacity: .045; transform: rotate(12deg);
+  }
+  #pricing .grid > div:nth-child(2) { isolation: isolate; }
+  #pricing .grid > div:nth-child(2)::before {
+    content: ""; position: absolute; inset: 12% 0 8%; z-index: -1;
+    pointer-events: none; background: url('/stratos-logo.svg') center / 95% auto no-repeat;
+    filter: brightness(0) saturate(100%) invert(89%) sepia(45%) saturate(550%);
+    opacity: .065;
+  }
+}
+</style>
 </head>
 <body class="selection:bg-[#c9f36a] selection:text-black">
-<div id="stratosBetaBuild" aria-label="Beta stage, build 2026-11-24 B09"><span class="beta-dot" aria-hidden="true"></span>BETA STAGE · B09</div>
+<div id="stratosBetaBuild" aria-label="Beta stage, build 2026-11-24 B11"><span class="beta-dot" aria-hidden="true"></span>BETA STAGE · B11</div>
 
 <!-- Sticky Header -->
 <header class="sticky top-0 z-40 bg-[#f5f5f0]/95 backdrop-blur-md border-b border-[var(--line)]">
@@ -420,6 +475,9 @@ main [id] { scroll-margin-top: 0 !important; }
     </button>
   </div>
 
+<div class="b10-desktop-strip" aria-label="Internship announcements">
+<div class="b10-topline"><span class="b10-pill">⚡ Explore internships</span><span>4 internship pathways · 20 domains</span><a href="#pricing">Compare certificate plans →</a><span id="b10Deadline" hidden></span></div>
+<div class="b10-ticker"><div class="b10-ticker-track"><span>⚡ EXPLORE 20 INTERNSHIP DOMAINS</span><span>▤ PREVIEW SAMPLE CERTIFICATES</span><span>▦ EXPLORE QR VERIFICATION</span><span>→ CHOOSE YOUR PROJECT TRACK</span><span aria-hidden="true">⚡ EXPLORE 20 INTERNSHIP DOMAINS</span><span aria-hidden="true">▤ PREVIEW SAMPLE CERTIFICATES</span><span aria-hidden="true">▦ EXPLORE QR VERIFICATION</span><span aria-hidden="true">→ CHOOSE YOUR PROJECT TRACK</span></div></div></div>
   <!-- Mobile Nav Menu -->
   <div id="mobileMenu" class="hidden md:hidden bg-white border-b border-[var(--line)] px-6 py-4 space-y-3 shadow-xl">
     <a href="#internship-categories" onclick="toggleMobileMenu()" class="block font-bold text-slate-700 py-1">All Four Internships</a>
@@ -468,14 +526,14 @@ main [id] { scroll-margin-top: 0 !important; }
       <a class="stratos-category group" href="/short-term-internships" aria-label="Explore Short-Term Internships">
         <div class="flex items-center justify-between gap-1 mb-1">
           <span class="cat-kicker">01 / FAST-TRACK</span>
-          <span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">🔥 4 Seats Left</span>
+          <span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase"><span class="b10-mobile-copy">🔥 4 Seats Left</span><span class="b10-desktop-copy">⚡ Fast track</span></span>
         </div>
         <h3>Short-Term<br>Internships</h3>
         <p>2–4 weeks of focused practical work &amp; rapid resume credentialing.</p>
         <div class="mb-3">
           <div class="flex justify-between text-[9px] font-extrabold text-slate-500 mb-1">
-            <span>Batch Quota</span>
-            <span class="text-amber-700">91% Full</span>
+            <span><span class="b10-mobile-copy">Batch Quota</span><span class="b10-desktop-copy">Program format</span></span>
+            <span class="text-amber-700"><span class="b10-mobile-copy">91% Full</span><span class="b10-desktop-copy">2–4 weeks</span></span>
           </div>
           <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div class="bg-amber-500 h-full w-[91%]"></div>
@@ -491,14 +549,14 @@ main [id] { scroll-margin-top: 0 !important; }
       <a class="stratos-category group" href="/long-term-internships" aria-label="Explore Long-Term Internships">
         <div class="flex items-center justify-between gap-1 mb-1">
           <span class="cat-kicker">02 / CREDIT-READY</span>
-          <span class="bg-red-100 text-red-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse">⚠️ Closing Soon</span>
+          <span class="bg-red-100 text-red-700 text-[9px] font-black px-2 py-0.5 rounded-full uppercase animate-pulse"><span class="b10-mobile-copy">⚠️ Closing Soon</span><span class="b10-desktop-copy">8–12 weeks</span></span>
         </div>
         <h3>Long-Term<br>Internships</h3>
         <p>8–12 weeks of structured, advanced capstone project experience.</p>
         <div class="mb-3">
           <div class="flex justify-between text-[9px] font-extrabold text-slate-500 mb-1">
-            <span>Batch Quota</span>
-            <span class="text-red-600">95% Full</span>
+            <span><span class="b10-mobile-copy">Batch Quota</span><span class="b10-desktop-copy">Program format</span></span>
+            <span class="text-red-600"><span class="b10-mobile-copy">95% Full</span><span class="b10-desktop-copy">8–12 weeks</span></span>
           </div>
           <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div class="bg-red-500 h-full w-[95%]"></div>
@@ -514,14 +572,14 @@ main [id] { scroll-margin-top: 0 !important; }
       <a class="stratos-category group" href="/summer-internships" aria-label="Explore Summer Internships">
         <div class="flex items-center justify-between gap-1 mb-1">
           <span class="cat-kicker">03 / SEASONAL 2026</span>
-          <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">⚡ High Demand</span>
+          <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase"><span class="b10-mobile-copy">⚡ High Demand</span><span class="b10-desktop-copy">Seasonal track</span></span>
         </div>
         <h3>Summer<br>Internships</h3>
         <p>Seasonal 2026 cohort with practical industry project deliverables.</p>
         <div class="mb-3">
           <div class="flex justify-between text-[9px] font-extrabold text-slate-500 mb-1">
-            <span>Batch Quota</span>
-            <span class="text-emerald-700">89% Full</span>
+            <span><span class="b10-mobile-copy">Batch Quota</span><span class="b10-desktop-copy">Program format</span></span>
+            <span class="text-emerald-700"><span class="b10-mobile-copy">89% Full</span><span class="b10-desktop-copy">Seasonal</span></span>
           </div>
           <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
             <div class="bg-emerald-600 h-full w-[89%]"></div>
@@ -543,8 +601,8 @@ main [id] { scroll-margin-top: 0 !important; }
         <p>Pick your ₹99–₹299 tier &amp; domain directly below for instant PDF dispatch.</p>
         <div class="mb-3">
           <div class="flex justify-between text-[9px] font-extrabold text-slate-300 mb-1">
-            <span>Instant Dispatch Quota</span>
-            <span class="text-[var(--green)]">97% Claimed</span>
+            <span><span class="b10-mobile-copy">Instant Dispatch Quota</span><span class="b10-desktop-copy">Certificate format</span></span>
+            <span class="text-[var(--green)]"><span class="b10-mobile-copy">97% Claimed</span><span class="b10-desktop-copy">PDF + QR</span></span>
           </div>
           <div class="w-full bg-white/15 h-1.5 rounded-full overflow-hidden">
             <div class="bg-[var(--green)] h-full w-[97%]"></div>
@@ -614,7 +672,7 @@ main [id] { scroll-margin-top: 0 !important; }
         <div>
           <div class="flex items-center justify-between mb-4">
             <span class="inline-block bg-[#39443a] text-[var(--green)] text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">Accelerated Track</span>
-            <span class="text-[10px] font-black text-red-400 animate-pulse">🔥 Only 4 Left</span>
+            <span class="text-[10px] font-black text-red-400 animate-pulse"><span class="b10-mobile-copy">🔥 Only 4 Left</span><span class="b10-desktop-copy">QR ID option</span></span>
           </div>
           <h3 class="text-2xl font-black text-white mb-1">Instant PDF Certificate &amp; QR ID</h3>
           <p class="text-xs text-slate-300 mb-5 leading-relaxed">Immediate seat locking, priority batch allotment, and instant PDF certificate generation sent directly to your email in 30 seconds.</p>
@@ -1725,6 +1783,12 @@ startLivePsychologicalFeed();
     });
   });
 })();
+</script>
+<script>
+(()=>{const deadlineISO = ''; // Set only to a confirmed enrollment deadline, e.g. ISO 8601 with timezone.
+const el=document.getElementById('b10Deadline'); const deadline=Date.parse(deadlineISO);
+if(!el || !Number.isFinite(deadline))return;
+const tick=()=>{const n=Math.max(0,Math.ceil((deadline-Date.now())/1000));el.hidden=false;el.textContent=n ? 'Enrollment closes in '+Math.floor(n/86400)+'d '+String(Math.floor(n/3600)%24).padStart(2,'0')+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0') : 'Enrollment deadline passed';};tick();setInterval(tick,1000);})();
 </script>
 </body>
 </html>
