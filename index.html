@@ -384,7 +384,18 @@ html { scroll-padding-top: var(--stratos-header-height, 130px); }
 main [id] { scroll-margin-top: 0 !important; }
 </style>
 <style>
-.institution-logo{display:inline-flex;align-items:center;justify-content:center;width:44px;height:36px;flex-shrink:0;border:1px solid #cbd2c5;border-radius:7px;background:#f5f5f0;color:#29382c;font:800 10px/1 Manrope,sans-serif;letter-spacing:.03em}.institution-logo img{width:100%;height:100%;object-fit:contain}
+.institution-strip{padding:20px 16px 14px}
+.institution-inner{gap:32px}
+.institution-heading{max-width:220px;font-size:12px}
+.institution-images{gap:16px}
+.institution-images img{width:clamp(110px,14vw,180px);height:104px;padding:7px;border:1px solid #e3e8df;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(32,39,35,.07)}
+@media(max-width:767px){
+  .institution-strip{padding:16px 10px 12px}
+  .institution-inner{display:block}
+  .institution-heading{max-width:none;margin-bottom:12px}
+  .institution-images{justify-content:space-between;gap:8px}
+  .institution-images img{width:calc((100% - 24px)/4);min-width:68px;height:76px;padding:5px;border-radius:10px}
+}
 </style>
 <style>
 .b10-desktop-strip{display:none}
@@ -501,8 +512,8 @@ main .stratos-category .cat-cta-btn{background:#e4f3bb}main .stratos-category.fe
 <main>
 <div id="home" aria-hidden="true"></div>
 
-<!-- Institutional image slots: replace SVG assets with authorized logos -->
-<section class="institution-strip" aria-label="Education and technology references"><div class="institution-inner"><div class="institution-heading">Education &amp; technology references</div><div class="institution-images"><img src="/assets/logos/aicte.svg" alt="AICTE logo placeholder" width="180" height="100" decoding="async"><img src="/assets/logos/msme.svg" alt="MSME logo placeholder" width="180" height="100" decoding="async"><img src="/assets/logos/meta.svg" alt="Meta logo placeholder" width="180" height="100" decoding="async"><img src="/assets/logos/microsoft.svg" alt="Microsoft logo placeholder" width="180" height="100" decoding="async"></div></div><p class="institution-note">Reference names only; no endorsement or accreditation is implied.</p></section>
+<!-- Organization logos supplied for this site -->
+<section class="institution-strip" aria-label="Education and technology references"><div class="institution-inner"><div class="institution-heading">Education &amp; technology references</div><div class="institution-images"><img src="/assets/logos/aicte.jpg" alt="AICTE logo" width="180" height="100" decoding="async"><img src="/assets/logos/msme.png" alt="MSME logo" width="180" height="100" decoding="async"><img src="/assets/logos/meta.jpg" alt="Meta logo" width="180" height="100" decoding="async"><img src="/assets/logos/microsoft.png" alt="Microsoft logo" width="180" height="100" decoding="async"></div></div><p class="institution-note">Reference names only; no endorsement or accreditation is implied.</p></section>
 
 <!-- 1. FOUR INTERNSHIP CATEGORIES (High-Conversion Psychological Hurry Triggers) -->
 <section id="internship-categories" class="py-7 sm:py-9" aria-labelledby="internship-categories-heading">
