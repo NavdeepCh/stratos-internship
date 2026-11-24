@@ -5,7 +5,7 @@
   "main": "firebase-config.js",
   "scripts": {
     "dev": "wrangler pages dev . --compatibility-date=2026-11-23",
-    "test": "node --check worker.js"
+    "test": "node --check worker.js && node --check js/internship-catalog.js && node --check js/category-page.js && node scripts/test-internship-catalog.js"
   },
   "keywords": [],
   "author": "",
