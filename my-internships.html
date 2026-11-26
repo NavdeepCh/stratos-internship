@@ -25,18 +25,20 @@
   </main>
   <script type="module">
     import { requireStudent, signOutStudent } from "/js/auth.js";
-    import { getStudentEnrollments } from "/js/enrollment-service.js";
+    import { getStudentEnrollments, escapeHtml } from "/js/enrollment-service.js";
     document.querySelector("#signOut").addEventListener("click",signOutStudent);
     requireStudent(async(user)=>{
+      try {
       document.querySelector("#welcome").textContent=`Welcome back, ${user.displayName||user.email}`;
       const enrollments=await getStudentEnrollments(user);
       const grid=document.querySelector("#enrollmentGrid");
       grid.innerHTML=enrollments.length?enrollments.map((item)=>`
         <a href="/my-internships/${encodeURIComponent(item.registrationId)}" class="block bg-white border border-[var(--line)] rounded-2xl p-6 hover:border-[var(--ink)]">
-          <h2 class="text-xl font-black">${item.track||"Internship"}</h2>
-          <p class="text-xs text-[var(--muted)] mt-2">${item.category||"Internship"} · ${item.registrationId}</p>
-          <div class="mt-5 text-xs space-y-2"><p><strong>Payment:</strong> ${item.paymentStatus||"PENDING"}</p><p><strong>Project:</strong> ${item.projectStatus||"REGISTERED"}</p></div>
-        </a>`).join(""):`<p class="text-sm text-[var(--muted)]">No verified internships are linked to this account yet.</p>`;
+          <h2 class="text-xl font-black">${escapeHtml(item.track||"Internship")}</h2>
+          <p class="text-xs text-[var(--muted)] mt-2">${escapeHtml(item.category||"Internship")} · ${escapeHtml(item.registrationId)}</p>
+          <div class="mt-5 text-xs space-y-2"><p><strong>Payment:</strong> ${escapeHtml(item.paymentStatus||"PENDING")}</p><p><strong>Project:</strong> ${escapeHtml(item.projectStatus||"REGISTERED")}</p></div>
+        </a>`).join(""):`<p class="text-sm text-[var(--muted)]">No verified internships are linked to this account yet. <a href="/" class="underline">Explore programs</a>.</p>`;
+      } catch(error) { document.querySelector("#enrollmentGrid").textContent="Unable to load internships. Please contact support if this persists."; }
     });
   </script>
 </body>

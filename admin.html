@@ -13,8 +13,8 @@
 <link rel="icon" sizes="16x16 32x32 48x48" href="/favicon.ico"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></head>
 <body>
   <main class="max-w-6xl mx-auto p-6">
-    <h1 class="text-4xl font-black">Project Review Queue</h1>
+    <h1 class="text-4xl font-black">Internship Administration</h1>
     <p id="adminStatus" class="mt-4 text-sm text-[var(--muted)]">Administrator access will be enabled after Firebase custom claims are configured.</p>
-  </main>
+  <div class="mt-6 flex flex-wrap gap-3"><select id="categoryFilter" class="border rounded p-2"><option value="">All categories</option><option value="instant">Instant</option><option value="short-term">Short-Term</option><option value="long-term">Long-Term</option><option value="summer">Summer</option></select><input id="search" class="border rounded p-2" placeholder="Registration ID or name"><select id="paymentFilter" class="border rounded p-2"><option value="">All payment statuses</option><option>Paid</option><option>Not Required</option><option>Pending</option></select></div><p id="metrics" class="my-4 font-bold"></p><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead><tr><th>ID</th><th>Student</th><th>Category</th><th>Plan</th><th>Payment</th><th>Project</th></tr></thead><tbody id="records"></tbody></table></div></main><script type="module" src="/js/admin-dashboard.js"></script>
 </body>
 </html>
