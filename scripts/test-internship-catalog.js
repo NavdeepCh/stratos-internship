@@ -22,8 +22,12 @@ for (const categoryId of ["short-term", "long-term", "summer"]) {
   assert.equal(recommendedPlans.length, 1, `${categoryId} must identify one balanced-scope plan`);
   assert.equal(recommendedPlans[0].recommendationLabel, "Balanced scope");
 
+  assert.deepEqual(category.plans.map(p=>p.priceINR), {"short-term":[0,99,299],"long-term":[0,199,399],summer:[0,149,349]}[categoryId]);
   for (const plan of category.plans) {
-    assert.ok(Number.isInteger(plan.proposedPriceINR) && plan.proposedPriceINR > 0);
+    assert.equal(plan.expectedAmountPaise, plan.priceINR * 100);
+    assert.equal(plan.certificateIncluded, true);
+    assert.equal(plan.instantPdfIncluded, plan.name === "Premium");
+    assert.ok(Number.isInteger(plan.priceINR) && plan.priceINR >= 0);
     assert.ok(Number.isInteger(plan.weeks) && plan.weeks > 0);
   }
   for (const item of category.domains) {

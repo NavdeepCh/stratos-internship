@@ -3,7 +3,7 @@ import { auth } from "./firebase.js";
 
 export function requireStudent(onReady) {
   return onAuthStateChanged(auth, async (user) => {
-    if (!user || user.isAnonymous) {
+    if (!user || user.isAnonymous || !user.emailVerified) {
       window.location.replace("/sign-in");
       return;
     }
