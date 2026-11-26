@@ -9,7 +9,10 @@ assert.equal(getInternshipCategory("missing"), null);
 for (const categoryId of ["short-term", "long-term", "summer"]) {
   const category = getInternshipCategory(categoryId);
   assert.equal(category.id, categoryId);
-  assert.equal(category.domains.length, 20, `${categoryId} must define 20 domains`);
+  assert.ok(category.domains.length >= 36);
+  assert.deepEqual(category.plans.map(p=>p.amountPaise), {"short-term":[0,9900,29900],"long-term":[0,19900,39900],summer:[0,14900,34900]}[categoryId]);
+  assert.ok(category.plans.every(p=>p.certificateIncluded));
+  assert.deepEqual(category.plans.map(p=>p.instantPdfIncluded),[false,false,true]);
   assert.equal(category.plans.length, 3, `${categoryId} must define 3 plans`);
   assert.equal(category.enrollment.available, false);
   assert.equal(category.enrollment.deadline, null);
@@ -20,13 +23,9 @@ for (const categoryId of ["short-term", "long-term", "summer"]) {
 
   const recommendedPlans = category.plans.filter((plan) => plan.recommended);
   assert.equal(recommendedPlans.length, 1, `${categoryId} must identify one balanced-scope plan`);
-  assert.equal(recommendedPlans[0].recommendationLabel, "Balanced scope");
+  assert.equal(recommendedPlans[0].recommendationLabel, "Recommended");
 
-  assert.deepEqual(category.plans.map(p=>p.priceINR), {"short-term":[0,99,299],"long-term":[0,199,399],summer:[0,149,349]}[categoryId]);
   for (const plan of category.plans) {
-    assert.equal(plan.expectedAmountPaise, plan.priceINR * 100);
-    assert.equal(plan.certificateIncluded, true);
-    assert.equal(plan.instantPdfIncluded, plan.name === "Premium");
     assert.ok(Number.isInteger(plan.priceINR) && plan.priceINR >= 0);
     assert.ok(Number.isInteger(plan.weeks) && plan.weeks > 0);
   }

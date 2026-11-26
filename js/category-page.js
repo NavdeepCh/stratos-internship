@@ -1,5 +1,4 @@
-import { applicationPayload } from "./category-enrollment.js";
-import { getInternshipCategory } from "./internship-catalog.js";
+import { getInternshipCategory } from "./internship-catalog.js?v=20261126-2";
 
 const categoryId = document.body.dataset.categoryId;
 const category = getInternshipCategory(categoryId);
@@ -27,21 +26,21 @@ function list(items) {
 
 function renderPlan(plan) {
   const duration = plan.weeks ? `${plan.weeks} weeks` : "Flexible duration";
-  const price = plan.priceINR === 0 ? "FREE" : `₹${plan.priceINR.toLocaleString("en-IN")}`;
+  const price = plan.priceINR === 0 ? "FREE" : `₹${plan.priceINR}`;
   const milestones = plan.milestones ? `<p class="plan-meta">${plan.milestones} project milestones</p>` : "";
   const scope = plan.projectScope ? `<p class="plan-scope">${escapeHtml(plan.projectScope)}</p>` : "";
   const recommended = plan.recommended
     ? `<span class="plan-recommendation">${escapeHtml(plan.recommendationLabel || "Recommended scope")}</span>`
     : "";
-  return `<article class="plan-card${plan.instantPdfIncluded ? " plan-premium" : ""}${plan.recommended ? " plan-card-recommended" : ""}">
-    ${recommended}${plan.instantPdfIncluded ? `<span class="premium-label">INSTANT ENROLLMENT PDF</span>` : ""}
+  return `<article class="plan-card ${plan.instantPdfIncluded ? "premium-plan" : ""}${plan.recommended ? " plan-card-recommended" : ""}">
+    ${recommended}
     <p class="eyebrow">${escapeHtml(plan.level)}</p>
     <h3>${escapeHtml(plan.name)}</h3>
     <p class="plan-duration">${duration}</p>
     <p class="plan-price">${price}</p>
-    <p class="plan-disclosure">Enrollment opens after backend verification.</p>
+    <p class="plan-disclosure">Completion certificate included after approval.</p>
     ${scope}${milestones}${list(plan.benefits)}
-    <button class="button button-outline" type="button" data-select-plan="${escapeHtml(plan.id)}" aria-pressed="false">Select plan</button>
+    <button class="button button-outline" type="button" data-select-plan="${escapeHtml(plan.id)}" aria-pressed="false">${plan.priceINR === 0 ? "Start for Free" : plan.instantPdfIncluded ? "Get Premium" : "Enroll Now"}</button>
   </article>`;
 }
 
@@ -68,10 +67,10 @@ function renderDomain(item) {
   const specialization = item.specializations.length
     ? `<p class="domain-specializations"><strong>Specializations:</strong> ${item.specializations.map(escapeHtml).join(" · ")}</p>`
     : "";
-  return `<article class="domain-card">
+  return `<article class="domain-card" data-branch="${escapeHtml(item.branch)}" data-search="${escapeHtml([item.name,item.description,...item.skills].join(" ").toLowerCase())}">
     <details>
       <summary><span class="domain-icon" aria-hidden="true">${item.emoji}</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description)}</small></span></summary>
-      <div class="domain-detail">${detail}${specialization}
+      <div class="domain-detail">${detail}${specialization}${item.reviewRequired ? `<p>Project brief available for review; enrollment requires resource approval.</p>` : ""}
         <button class="button button-outline domain-select" type="button" data-select-domain="${escapeHtml(item.id)}" aria-pressed="false">Choose domain</button>
       </div>
     </details>
@@ -106,7 +105,7 @@ const categoryLinkMarkup = categoryLinks.map(({ href, label }) =>
 app.innerHTML = `
   <div class="announcement-strip">
     <span>${escapeHtml(category.name)} · ${category.domains.length} domains · ${category.plans.length} plan options</span>
-    <span>${category.enrollment.available ? "Enrollment information" : "Enrollment is not open yet"}</span>
+    <span>${category.enrollment.available ? "Enrollment information" : "Enrollment & registration"}</span>
   </div>
   <header class="site-header">
     <a class="brand" href="/" aria-label="Stratos Global Education home">
@@ -150,12 +149,12 @@ app.innerHTML = `
         <div class="overview-duration"><span>Program duration</span><strong>${durationText}</strong></div>
         <ul class="overview-features">
           <li><span aria-hidden="true">▦</span><span><strong>${category.domains.length} domains</strong><small>Choose a practical focus</small></span></li>
-          <li><span aria-hidden="true">◈</span><span><strong>${category.plans.length} plan options</strong><small>Proposed scopes and durations</small></span></li>
+          <li><span aria-hidden="true">◈</span><span><strong>${category.plans.length} plan options</strong><small>Project scopes and durations</small></span></li>
           <li><span aria-hidden="true">⌘</span><span><strong>Virtual internship</strong><small>Project-based learning</small></span></li>
           <li><span aria-hidden="true">✓</span><span><strong>Practical project</strong><small>${escapeHtml(projectRequirement)}</small></span></li>
           <li><span aria-hidden="true">♧</span><span><strong>QR-verifiable certificate</strong><small>After successful completion and approval</small></span></li>
         </ul>
-        <a class="button overview-cta" href="#domains">Explore Internship Domains <span aria-hidden="true">→</span></a>
+        <a class="button overview-cta" href="#plans">Explore Internship Plans <span aria-hidden="true">→</span></a>
       </aside>
     </section>
 
@@ -184,10 +183,10 @@ app.innerHTML = `
       <div class="section-heading">
         <p class="eyebrow">PLAN OPTIONS</p>
         <h2 id="plans-title">Choose a project scope</h2>
-        <p>Every plan includes a QR-verifiable completion certificate after approval. Premium includes planned instant enrollment PDF delivery after verified payment.</p>
+        <p>Choose your duration and project scope. All plans include a completion certificate after successful evaluation.</p>
       </div>
-      <p class="selection-summary">Selected domain: <strong data-plan-domain>None yet</strong></p><div class="plans-grid">${category.plans.map(renderPlan).join("")}</div>
-      <p class="plan-footnote">Enrollment is temporarily unavailable pending backend activation. No payment will be collected.</p>
+      <div class="plans-grid">${category.plans.map(renderPlan).join("")}</div>
+      <p class="plan-footnote">Payment and enrollment availability are checked securely before submission.</p>
     </section>
 
     <section class="section domains-section" id="domains" aria-labelledby="domains-title">
@@ -196,8 +195,8 @@ app.innerHTML = `
         <h2 id="domains-title">Find a project that fits</h2>
         <p>Select a domain to include it in your application preferences. Project examples are illustrative and can be adapted to the selected plan.</p>
       </div>
-      <label class="domain-search-label">Search domains <input id="domainSearch" type="search" placeholder="Search by name or skill"></label><p class="selection-summary" aria-live="polite">Selected domain: <strong data-selected-domain>None yet</strong></p>
-      <div class="domains-grid">${category.domains.map(renderDomain).join("")}</div>
+      <p class="selection-summary" aria-live="polite">Selected domain: <strong data-selected-domain>None yet</strong></p>
+      <div class="filter-bar"><label>Branch<select id="branchFilter"><option value="">All Domains</option>${[...new Set(category.domains.map(d=>d.branch))].map(b=>`<option>${escapeHtml(b)}</option>`).join("")}</select></label><label>Search domains<input id="domainSearch" type="search" placeholder="Search skills or domains"></label><button type="button" id="clearFilters">Clear filters</button><span id="resultCount" aria-live="polite"></span></div><div class="domains-grid">${category.domains.map(renderDomain).join("")}</div>
     </section>
 
     <section class="section requirements-section" aria-labelledby="requirements-title">
@@ -229,16 +228,16 @@ app.innerHTML = `
       <div class="certificate-panel">
         <p class="eyebrow">COMPLETION CERTIFICATE</p>
         <h2 id="certificate-title">Earned through completed work</h2>
-        <p>Certificate eligibility depends on meeting the project requirements and passing the applicable evaluation. A verified QR credential is provided only after issuance; all plans include a completion certificate after approval. Premium enrollment PDFs are separate documents and do not certify completion.</p>
+        <p>Certificate eligibility depends on meeting the project requirements and passing the applicable evaluation. A verified QR credential is provided only after issuance; no certificate is issued simply for registering or paying.</p>
       </div>
     </section>
 
     <section class="section faq-section" aria-labelledby="faq-title">
       <div class="section-heading"><p class="eyebrow">FAQ</p><h2 id="faq-title">Common questions</h2></div>
       <div class="faq-list">
-        <details><summary>Can I enroll in this category now?</summary><p>Enrollment and checkout are not enabled for this category. The listed plans are not yet available to purchase.</p></details>
+        <details><summary>Can I enroll in this category now?</summary><p>Complete the registration form. Enrollment is available only when the secure backend confirms support for your selection.</p></details>
         <details><summary>Are the listed project examples guaranteed assignments?</summary><p>No. Examples illustrate the type of work; an assigned project brief and requirements must be confirmed when enrollment is available.</p></details>
-        <details><summary>How are project complexity and duration determined?</summary><p>Each plan indicates a proposed duration and scope. Final project requirements must be confirmed before enrollment opens.</p></details>
+        <details><summary>How are project complexity and duration determined?</summary><p>Each plan indicates a duration and scope. Final project requirements must be confirmed before enrollment opens.</p></details>
         <details><summary>Does registration guarantee a certificate or placement?</summary><p>No. Certificates require successful evaluation of required work. This program does not promise employment or placement.</p></details>
         <details><summary>Where will I submit project work?</summary><p>Submissions use the manually managed Google Form process. A form URL has not been configured for this category yet.</p></details>
         ${categoryId === "summer" ? `<details><summary>When does the summer batch start?</summary><p>Summer enrollment dates have not been configured, so no batch date is being advertised.</p></details>` : ""}
@@ -248,10 +247,10 @@ app.innerHTML = `
     <section class="section application-section" id="application" aria-labelledby="application-title">
       <div class="application-panel">
         <p class="eyebrow">APPLICATION STATUS</p>
-        <h2 id="application-title">Enrollment is not open yet</h2>
-        <p>Registration and category checkout are not active. No payment can be collected for this program. Your selections are previews only and are not submitted.</p>
+        <h2 id="application-title">Enrollment & registration</h2>
+        <p>Complete your details below. Availability is verified before any registration or payment.</p>
         <p class="application-selection">Selected plan: <strong data-selected-plan>None yet</strong> · Selected domain: <strong data-application-domain>None yet</strong></p>
-        <form id="applicationPreview" class="application-preview"><label>Full name <input name="fullName" required maxlength="100" autocomplete="name"></label><label>Phone (+91) <input name="phone" type="tel" required autocomplete="tel" placeholder="+919876543210"></label><button class="button button-primary" type="submit">Review selection</button><p id="applicationFeedback" role="status"></p></form><a class="button button-primary" href="/my-internships">Go to My Internships</a>
+        <form id="enrollForm" class="enroll-form"><label>Full name<input name="fullName" required maxlength="120" autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Mobile number<input name="phone" required pattern="[0-9]{10}" inputmode="numeric"></label><label>College / university<input name="college" required maxlength="180"></label><label>Academic branch<input name="academicBranch" required></label><label>Academic year<select name="academicYear" required><option value="">Choose year</option><option>1</option><option>2</option><option>3</option><option>4</option><option>Graduate</option></select></label><label>Category<input value="${escapeHtml(category.name)}" readonly></label><label>Domain<input id="formDomain" readonly required></label><label>Package<input id="formPlan" readonly required></label><label>Start date<input name="startDate" type="date" required></label><label>End date<input id="endDate" readonly></label><label class="consent"><input type="checkbox" name="consent" required> I agree to project evaluation and processing of my registration details.</label><button class="button button-primary" type="submit">Continue securely</button><p id="enrollStatus" role="status"></p></form>
         <a class="button button-secondary" href="/">Explore all programs</a>
       </div>
     </section>
@@ -262,14 +261,10 @@ app.innerHTML = `
     <p>© ${new Date().getFullYear()} Stratos Global Education</p>
   </footer>`;
 
-const main = app.querySelector("main");
-main.insertBefore(app.querySelector("#domains"), app.querySelector("#plans"));
-main.insertBefore(app.querySelector("#plans"), app.querySelector(".benefits-section"));
-main.insertBefore(app.querySelector("#domains"), app.querySelector("#plans"));
-app.querySelector("#domainSearch").addEventListener("input", event => {
- const q = event.target.value.trim().toLowerCase();
- app.querySelectorAll(".domain-card").forEach(card => { card.hidden = !card.textContent.toLowerCase().includes(q); });
-});
+// Put domain discovery before pricing in the actual rendered page.
+app.querySelector("#plans").before(app.querySelector("#domains"));
+const filters = () => {let count=0;const branch=app.querySelector("#branchFilter").value;const term=app.querySelector("#domainSearch").value.trim().toLowerCase();for(const card of app.querySelectorAll(".domain-card")){card.hidden=!!((branch&&card.dataset.branch!==branch)||!card.dataset.search.includes(term));if(!card.hidden)count++;}app.querySelector("#resultCount").textContent=`${count} domains`;};
+app.querySelector("#branchFilter").addEventListener("change",filters);app.querySelector("#domainSearch").addEventListener("input",filters);app.querySelector("#clearFilters").onclick=()=>{app.querySelector("#branchFilter").value="";app.querySelector("#domainSearch").value="";filters();};filters();
 let selectedDomain = null;
 let selectedPlan = null;
 app.addEventListener("click", (event) => {
@@ -284,22 +279,22 @@ app.addEventListener("click", (event) => {
       button.textContent = selected ? "Selected" : "Choose domain";
     });
     app.querySelector("[data-selected-domain]").textContent = selectedDomain.name;
-    app.querySelector("[data-application-domain]").textContent = selectedDomain.name;
-    app.querySelector("[data-plan-domain]").textContent = selectedDomain.name;
-    app.querySelector("#plans").scrollIntoView({block:"start"});
+    app.querySelector("[data-application-domain]").textContent = selectedDomain.name; app.querySelector("#formDomain").value=selectedDomain.name; app.querySelector("#plans").scrollIntoView({behavior:"smooth"});
   }
 
   if (planButton) {
-    if (!selectedDomain) { app.querySelector("#domains").scrollIntoView({block:"start"}); app.querySelector("#domainSearch").focus({preventScroll:true}); return; }
+    if(!selectedDomain){app.querySelector("#domains").scrollIntoView({behavior:"smooth"});app.querySelector("#domainSearch").focus({preventScroll:true});return;}
     selectedPlan = category.plans.find((plan) => plan.id === planButton.dataset.selectPlan);
     app.querySelectorAll("[data-select-plan]").forEach((button) => {
       const selected = button.dataset.selectPlan === selectedPlan.id;
       button.setAttribute("aria-pressed", String(selected));
       button.textContent = selected ? "Selected plan" : "Select plan";
     });
-    app.querySelector("[data-selected-plan]").textContent = `${selectedPlan.name} · ${selectedPlan.weeks} weeks`;
-    app.querySelector("#application").scrollIntoView({block:"start"});
+    app.querySelector("[data-selected-plan]").textContent = `${selectedPlan.name} · ${selectedPlan.weeks} weeks`; app.querySelector("#formPlan").value=selectedPlan.name; updateEnd(); app.querySelector("#application").scrollIntoView({behavior:"smooth"});
   }
 });
 
-app.querySelector('#applicationPreview').addEventListener('submit',event=>{event.preventDefault();const feedback=app.querySelector('#applicationFeedback');try{applicationPayload(category,selectedDomain,selectedPlan,Object.fromEntries(new FormData(event.target)));feedback.textContent=`${selectedDomain.name} · ${selectedPlan.name} · ${selectedPlan.priceINR===0?'FREE':'₹'+selectedPlan.priceINR}. Preview only: no registration or payment has been submitted.`;}catch(error){feedback.textContent=error.message;}});
+const form=app.querySelector("#enrollForm");
+function updateEnd(){const start=form.elements.startDate.value;if(!start||!selectedPlan)return;const d=new Date(start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+selectedPlan.weeks*7);app.querySelector("#endDate").value=d.toISOString().slice(0,10);}
+form.elements.startDate.min=new Date().toLocaleDateString("en-CA");form.elements.startDate.addEventListener("change",updateEnd);
+form.addEventListener("submit",async e=>{e.preventDefault();const status=app.querySelector("#enrollStatus");const button=form.querySelector("button");if(!selectedDomain||!selectedPlan){status.textContent="Select a domain and package first.";return;}button.disabled=true;status.textContent="Checking secure enrollment availability…";try{const {enroll}=await import("./category-checkout.js");await enroll({categoryId,domainId:selectedDomain.id,planId:selectedPlan.id,...Object.fromEntries(new FormData(form))},selectedPlan,status);}catch(err){status.textContent=err.message||"Enrollment unavailable. Please try again later.";}finally{button.disabled=false;}});

@@ -1,0 +1,16 @@
+ BROWSER_TEST_RESULTS.txt           | 37 +++++++++++++++++++++++++++
+ CHANGE_SUMMARY.txt                 |  0
+ CLOUDFLARE_WORKER_UPDATE_GUIDE.md  |  3 +++
+ FIRESTORE_SCHEMA_AND_MIGRATION.md  |  2 ++
+ PRODUCTION_READINESS_REPORT.md     |  2 ++
+ category-pages.css                 |  2 ++
+ js/category-checkout.js            | 17 +++++++++++++
+ js/category-page.js                | 52 +++++++++++++++++++++++---------------
+ js/internship-catalog.js           | 24 ++++++++++++++++++
+ long-term-internships/index.html   | 12 ++++-----
+ my-internships.html                |  9 ++++---
+ scripts/test-internship-catalog.js |  9 ++++---
+ short-term-internships/index.html  | 12 ++++-----
+ summer-internships/index.html      | 12 ++++-----
+ version.json                       |  1 +
+ 15 files changed, 148 insertions(+), 46 deletions(-)
