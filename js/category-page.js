@@ -1,4 +1,4 @@
-import { getInternshipCategory } from "./internship-catalog.js?v=20261126-3";
+import { getInternshipCategory } from "./internship-catalog.js?v=20261126-2";
 
 const categoryId = document.body.dataset.categoryId;
 const category = getInternshipCategory(categoryId);
@@ -32,7 +32,7 @@ function renderPlan(plan) {
   const recommended = plan.recommended
     ? `<span class="plan-recommendation">${escapeHtml(plan.recommendationLabel || "Recommended scope")}</span>`
     : "";
-  return `<article class="plan-card ${plan.level === "Premium" ? "premium-plan" : ""}${plan.recommended ? " plan-card-recommended" : ""}">
+  return `<article class="plan-card ${plan.instantPdfIncluded ? "premium-plan" : ""}${plan.recommended ? " plan-card-recommended" : ""}">
     ${recommended}
     <p class="eyebrow">${escapeHtml(plan.level)}</p>
     <h3>${escapeHtml(plan.name)}</h3>
@@ -40,7 +40,7 @@ function renderPlan(plan) {
     <p class="plan-price">${price}</p>
     <p class="plan-disclosure">Completion certificate included after approval.</p>
     ${scope}${milestones}${list(plan.benefits)}
-    <button class="button button-outline" type="button" data-select-plan="${escapeHtml(plan.id)}" aria-pressed="false">${plan.priceINR === 0 ? "Start for Free" : plan.level === "Premium" ? "Get Premium" : "Enroll Now"}</button>
+    <button class="button button-outline" type="button" data-select-plan="${escapeHtml(plan.id)}" aria-pressed="false">${plan.priceINR === 0 ? "Start for Free" : plan.instantPdfIncluded ? "Get Premium" : "Enroll Now"}</button>
   </article>`;
 }
 
@@ -68,7 +68,7 @@ function renderDomain(item) {
     ? `<p class="domain-specializations"><strong>Specializations:</strong> ${item.specializations.map(escapeHtml).join(" · ")}</p>`
     : "";
   return `<article class="domain-card" data-branch="${escapeHtml(item.branch)}" data-search="${escapeHtml([item.name,item.description,...item.skills].join(" ").toLowerCase())}">
-    <button class="quick-domain-select" type="button" data-select-domain="${escapeHtml(item.id)}" aria-pressed="false" aria-label="Select ${escapeHtml(item.name)}">○ Select</button><details>
+    <details>
       <summary><span class="domain-icon" aria-hidden="true">${item.emoji}</span><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description)}</small></span></summary>
       <div class="domain-detail">${detail}${specialization}${item.reviewRequired ? `<p>Project brief available for review; enrollment requires resource approval.</p>` : ""}
         <button class="button button-outline domain-select" type="button" data-select-domain="${escapeHtml(item.id)}" aria-pressed="false">Choose domain</button>
@@ -245,14 +245,14 @@ app.innerHTML = `
     </section>
 
     <section class="section application-section" id="application" aria-labelledby="application-title">
-      <div class="registration-layout"><div class="application-panel"><div class="registration-heading">
-        <p class="eyebrow">VIRTUAL INTERNSHIP PROGRAM</p>
-        <h2 id="application-title">${escapeHtml(category.name)} Registration</h2>
-        <p>Choose your domain and package, then enter your details.</p></div><div class="registration-body"><div id="packagePreview" class="package-preview"></div>
+      <div class="application-panel">
+        <p class="eyebrow">APPLICATION STATUS</p>
+        <h2 id="application-title">Enrollment & registration</h2>
+        <p>Complete your details below. Availability is verified before any registration or payment.</p>
         <p class="application-selection">Selected plan: <strong data-selected-plan>None yet</strong> · Selected domain: <strong data-application-domain>None yet</strong></p>
-        <form id="enrollForm" class="enroll-form"><label>Full name<input name="fullName" required maxlength="120" autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Mobile number<input name="phone" required pattern="[0-9]{10}" inputmode="numeric"></label><label>College / university<input name="college" required maxlength="180"></label><label>Academic branch<input name="academicBranch" required></label><label>Academic year<select name="academicYear" required><option value="">Choose year</option><option>1</option><option>2</option><option>3</option><option>4</option><option>Graduate</option></select></label><label>Category<input value="${escapeHtml(category.name)}" readonly></label><label>Domain<select id="formDomain" required><option value="">Select domain</option>${category.domains.map(d=>`<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)}</option>`).join("")}</select></label><label>Package<select id="formPlan" required><option value="">Select package</option>${category.plans.map(p=>`<option value="${p.id}">${p.name} · ${p.priceINR ? "₹"+p.priceINR : "FREE"} · ${p.weeks} weeks</option>`).join("")}</select></label><label>Start date<input name="startDate" type="date" required></label><label>End date<input id="endDate" readonly></label><label id="addonRow" class="addon-row" hidden><input type="checkbox" name="instantEnrollmentPdfRequested"> <span><strong>Optional: instant enrollment PDF</strong><small>Enrollment confirmation, not a completion certificate. Price and availability to be confirmed; not charged here.</small></span></label><label class="consent"><input type="checkbox" name="consent" required> I agree to project evaluation and processing of my registration details.</label><button class="button button-primary" type="submit">Continue to enrollment</button><p id="enrollStatus" role="status"></p></form>
-        <a class="button button-secondary" href="#domains">Explore domains</a>
-      </div></div><aside class="registration-sidebar"><div class="urgent-card"><span class="urgent-icon">⚡</span><span class="urgent-badge">INSTANT OPTION</span><h2>Need it urgently?</h2><p>Explore our separate Instant Internship Certificate program and its requirements.</p><a class="button button-primary" href="/#pricing">Explore Instant Internship →</a></div><div class="why-card"><h3>Why choose this program?</h3><p>✓ Multiple domain options</p><p>✓ Flexible package durations</p><p>✓ Completion certificate after approval</p></div></aside></div>
+        <form id="enrollForm" class="enroll-form"><label>Full name<input name="fullName" required maxlength="120" autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label><label>Mobile number<input name="phone" required pattern="[0-9]{10}" inputmode="numeric"></label><label>College / university<input name="college" required maxlength="180"></label><label>Academic branch<input name="academicBranch" required></label><label>Academic year<select name="academicYear" required><option value="">Choose year</option><option>1</option><option>2</option><option>3</option><option>4</option><option>Graduate</option></select></label><label>Category<input value="${escapeHtml(category.name)}" readonly></label><label>Domain<input id="formDomain" readonly required></label><label>Package<input id="formPlan" readonly required></label><label>Start date<input name="startDate" type="date" required></label><label>End date<input id="endDate" readonly></label><label class="consent"><input type="checkbox" name="consent" required> I agree to project evaluation and processing of my registration details.</label><button class="button button-primary" type="submit">Continue securely</button><p id="enrollStatus" role="status"></p></form>
+        <a class="button button-secondary" href="/">Explore all programs</a>
+      </div>
     </section>
   </main>
   <footer class="site-footer">
@@ -263,28 +263,38 @@ app.innerHTML = `
 
 // Put domain discovery before pricing in the actual rendered page.
 app.querySelector("#plans").before(app.querySelector("#domains"));
-app.querySelector("main").prepend(app.querySelector("#application"));
 const filters = () => {let count=0;const branch=app.querySelector("#branchFilter").value;const term=app.querySelector("#domainSearch").value.trim().toLowerCase();for(const card of app.querySelectorAll(".domain-card")){card.hidden=!!((branch&&card.dataset.branch!==branch)||!card.dataset.search.includes(term));if(!card.hidden)count++;}app.querySelector("#resultCount").textContent=`${count} domains`;};
 app.querySelector("#branchFilter").addEventListener("change",filters);app.querySelector("#domainSearch").addEventListener("input",filters);app.querySelector("#clearFilters").onclick=()=>{app.querySelector("#branchFilter").value="";app.querySelector("#domainSearch").value="";filters();};filters();
 let selectedDomain = null;
 let selectedPlan = null;
-function syncSelection(){
- app.querySelectorAll('[data-select-domain]').forEach(b=>{const yes=b.dataset.selectDomain===selectedDomain?.id;b.setAttribute('aria-pressed',String(yes));b.textContent=yes?'✓ Selected':'○ Select';});
- app.querySelectorAll('[data-select-plan]').forEach(b=>{const yes=b.dataset.selectPlan===selectedPlan?.id;b.setAttribute('aria-pressed',String(yes));b.textContent=yes?'Selected plan': 'Select plan';});
- app.querySelector('[data-selected-domain]').textContent=selectedDomain?.name||'None yet';
- app.querySelector('[data-application-domain]').textContent=selectedDomain?.name||'None yet';
- app.querySelector('[data-selected-plan]').textContent=selectedPlan?.name||'None yet';
- app.querySelector('#formDomain').value=selectedDomain?.id||'';app.querySelector('#formPlan').value=selectedPlan?.id||'';
- const premium=selectedPlan?.level==='Premium';app.querySelector('#addonRow').hidden=!premium;if(!premium)form.elements.instantEnrollmentPdfRequested.checked=false;
- app.querySelector('#packagePreview').innerHTML=selectedPlan?`<div class="preview-top"><div><span class="eyebrow">SELECTED PACKAGE</span><h3>${escapeHtml(selectedPlan.name)}</h3><p>${selectedPlan.weeks} weeks · ${escapeHtml(selectedDomain?.name||'Choose a domain')}</p></div><strong>${selectedPlan.priceINR?'₹'+selectedPlan.priceINR:'FREE'}</strong></div>${list(selectedPlan.benefits)}`:'<strong>Choose your package below</strong><p>Basic, Professional or Premium — all include a completion certificate after approval.</p>';
- updateEnd();
- form.querySelector("button[type=submit]").textContent=selectedPlan?.amountPaise?`Continue to payment · ₹${selectedPlan.priceINR}`:selectedPlan?"Register for free":"Continue to enrollment";
-}
-app.addEventListener('click',event=>{const d=event.target.closest('[data-select-domain]'),p=event.target.closest('[data-select-plan]');if(d){selectedDomain=category.domains.find(x=>x.id===d.dataset.selectDomain);syncSelection();app.querySelector('#application').scrollIntoView({behavior:'smooth'});}if(p){selectedPlan=category.plans.find(x=>x.id===p.dataset.selectPlan);syncSelection();app.querySelector('#application').scrollIntoView({behavior:'smooth'});}});
+app.addEventListener("click", (event) => {
+  const domainButton = event.target.closest("[data-select-domain]");
+  const planButton = event.target.closest("[data-select-plan]");
+
+  if (domainButton) {
+    selectedDomain = category.domains.find((item) => item.id === domainButton.dataset.selectDomain);
+    app.querySelectorAll("[data-select-domain]").forEach((button) => {
+      const selected = button.dataset.selectDomain === selectedDomain.id;
+      button.setAttribute("aria-pressed", String(selected));
+      button.textContent = selected ? "Selected" : "Choose domain";
+    });
+    app.querySelector("[data-selected-domain]").textContent = selectedDomain.name;
+    app.querySelector("[data-application-domain]").textContent = selectedDomain.name; app.querySelector("#formDomain").value=selectedDomain.name; app.querySelector("#plans").scrollIntoView({behavior:"smooth"});
+  }
+
+  if (planButton) {
+    if(!selectedDomain){app.querySelector("#domains").scrollIntoView({behavior:"smooth"});app.querySelector("#domainSearch").focus({preventScroll:true});return;}
+    selectedPlan = category.plans.find((plan) => plan.id === planButton.dataset.selectPlan);
+    app.querySelectorAll("[data-select-plan]").forEach((button) => {
+      const selected = button.dataset.selectPlan === selectedPlan.id;
+      button.setAttribute("aria-pressed", String(selected));
+      button.textContent = selected ? "Selected plan" : "Select plan";
+    });
+    app.querySelector("[data-selected-plan]").textContent = `${selectedPlan.name} · ${selectedPlan.weeks} weeks`; app.querySelector("#formPlan").value=selectedPlan.name; updateEnd(); app.querySelector("#application").scrollIntoView({behavior:"smooth"});
+  }
+});
+
 const form=app.querySelector("#enrollForm");
-form.querySelector("#formDomain").onchange=e=>{selectedDomain=category.domains.find(d=>d.id===e.target.value);syncSelection();};form.querySelector("#formPlan").onchange=e=>{selectedPlan=category.plans.find(p=>p.id===e.target.value);syncSelection();};
-function updateEnd(){const start=form.elements.startDate.value;if(!start||!selectedPlan){app.querySelector("#endDate").value="";return;}const d=new Date(start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+selectedPlan.weeks*7);app.querySelector("#endDate").value=d.toISOString().slice(0,10);}
+function updateEnd(){const start=form.elements.startDate.value;if(!start||!selectedPlan)return;const d=new Date(start+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+selectedPlan.weeks*7);app.querySelector("#endDate").value=d.toISOString().slice(0,10);}
 form.elements.startDate.min=new Date().toLocaleDateString("en-CA");form.elements.startDate.addEventListener("change",updateEnd);
-const draftKey="stratos-draft:"+categoryId;try{const draft=JSON.parse(sessionStorage.getItem(draftKey)||"null");if(draft){for(const [k,v] of Object.entries(draft.fields)){if(form.elements[k]&&form.elements[k].type!=="checkbox")form.elements[k].value=v;}selectedDomain=category.domains.find(d=>d.id===draft.domain);selectedPlan=category.plans.find(p=>p.id===draft.plan);}}catch{}
-syncSelection();
-form.addEventListener("submit",async e=>{e.preventDefault();const status=app.querySelector("#enrollStatus");const button=form.querySelector("button");if(!selectedDomain||!selectedPlan){status.textContent="Select a domain and package first.";return;}if(form.elements.instantEnrollmentPdfRequested.checked){status.textContent="The optional PDF add-on is not yet available for checkout. Uncheck it to continue with the base package.";return;}sessionStorage.setItem(draftKey,JSON.stringify({fields:Object.fromEntries(new FormData(form)),domain:selectedDomain.id,plan:selectedPlan.id}));button.disabled=true;status.textContent="Preparing your enrollment…";try{const {enroll}=await import("./category-checkout.js");await enroll({categoryId,domainId:selectedDomain.id,planId:selectedPlan.id,...Object.fromEntries(new FormData(form)) ,endDate:app.querySelector("#endDate").value},selectedPlan,status);}catch(err){status.textContent=err.message||"Enrollment unavailable. Please try again later.";}finally{button.disabled=false;}});
+form.addEventListener("submit",async e=>{e.preventDefault();const status=app.querySelector("#enrollStatus");const button=form.querySelector("button");if(!selectedDomain||!selectedPlan){status.textContent="Select a domain and package first.";return;}button.disabled=true;status.textContent="Checking secure enrollment availability…";try{const {enroll}=await import("./category-checkout.js");await enroll({categoryId,domainId:selectedDomain.id,planId:selectedPlan.id,...Object.fromEntries(new FormData(form))},selectedPlan,status);}catch(err){status.textContent=err.message||"Enrollment unavailable. Please try again later.";}finally{button.disabled=false;}});
