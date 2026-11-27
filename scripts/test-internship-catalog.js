@@ -12,7 +12,8 @@ for (const categoryId of ["short-term", "long-term", "summer"]) {
   assert.ok(category.domains.length >= 36);
   assert.deepEqual(category.plans.map(p=>p.amountPaise), {"short-term":[0,9900,29900],"long-term":[0,19900,39900],summer:[0,14900,34900]}[categoryId]);
   assert.ok(category.plans.every(p=>p.certificateIncluded));
-  assert.deepEqual(category.plans.map(p=>p.instantPdfIncluded),[false,false,true]);
+  assert.deepEqual(category.plans.map(p=>p.instantPdfIncluded),[false,false,false]);
+  assert.deepEqual(category.plans.map(p=>p.instantPdfAddonAvailable),[false,false,true]);
   assert.equal(category.plans.length, 3, `${categoryId} must define 3 plans`);
   assert.equal(category.enrollment.available, false);
   assert.equal(category.enrollment.deadline, null);
